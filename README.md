@@ -15,3 +15,8 @@ cd claude-folder
 
 - This folder is managed with Claude Code.
 - See the `.claude` directory for session configuration.
+
+## Contributing
+
+Feel free to open an issue or pull request for any improvements.
+Make sure your changes are small and focused — one thing per PR.
