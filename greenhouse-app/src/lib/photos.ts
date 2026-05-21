@@ -21,6 +21,10 @@ export async function savePhoto(surveyId: string, file: File): Promise<string> {
 export function deletePhoto(url: string): void {
   const rel = url.startsWith('/') ? url.slice(1) : url
   const filepath = path.join(process.cwd(), 'public', rel)
+  const uploadRoot = path.join(process.cwd(), 'public', 'uploads')
+  if (!filepath.startsWith(uploadRoot + path.sep) && filepath !== uploadRoot) {
+    throw new Error('Invalid photo path')
+  }
   if (fs.existsSync(filepath)) {
     fs.unlinkSync(filepath)
   }
@@ -29,5 +33,9 @@ export function deletePhoto(url: string): void {
 export function getPhotoBuffer(url: string): Buffer {
   const rel = url.startsWith('/') ? url.slice(1) : url
   const filepath = path.join(process.cwd(), 'public', rel)
+  const uploadRoot = path.join(process.cwd(), 'public', 'uploads')
+  if (!filepath.startsWith(uploadRoot + path.sep) && filepath !== uploadRoot) {
+    throw new Error('Invalid photo path')
+  }
   return fs.readFileSync(filepath)
 }

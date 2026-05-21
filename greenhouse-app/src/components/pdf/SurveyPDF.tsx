@@ -218,7 +218,7 @@ export default function SurveyPDF({
 
         {/* Photo sections */}
         {sections.map(section => section.photos.length > 0 && (
-          <View key={section.key} wrap={false}>
+          <View key={section.key} wrap={section.photos.length > 4}>
             <Text style={styles.sectionTitle}>{section.label}</Text>
             <View style={section.isDrone ? { flexDirection: 'column', gap: 6 } : styles.photoGrid}>
               {section.photos.map(photo => (

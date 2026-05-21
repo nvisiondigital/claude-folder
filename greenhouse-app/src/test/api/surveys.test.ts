@@ -199,6 +199,44 @@ describe('POST /api/surveys/[projectId]/photos', () => {
     const res = await POST_PHOTO(postReq, photoParams)
     expect(res.status).toBe(404)
   })
+
+  it('returns 400 for disallowed MIME type', async () => {
+    mockSurveyFindUnique.mockResolvedValueOnce(sampleSurvey)
+
+    const formData = new FormData()
+    formData.append('file', new File(['data'], 'malware.exe', { type: 'application/octet-stream' }))
+    formData.append('slotIndex', '1')
+
+    const postReq = new NextRequest('http://localhost/api/surveys/proj1/photos', {
+      method: 'POST',
+      headers: { cookie: 'ghs_session=valid' },
+      body: formData,
+    })
+    const res = await POST_PHOTO(postReq, photoParams)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toBe('Bestandstype niet toegestaan')
+  })
+
+  it('returns 400 when file exceeds 15 MB', async () => {
+    mockSurveyFindUnique.mockResolvedValueOnce(sampleSurvey)
+
+    // Create a File whose .size property exceeds 15 MB
+    const oversizedContent = new Uint8Array(16 * 1024 * 1024) // 16 MB
+    const formData = new FormData()
+    formData.append('file', new File([oversizedContent], 'big.jpg', { type: 'image/jpeg' }))
+    formData.append('slotIndex', '1')
+
+    const postReq = new NextRequest('http://localhost/api/surveys/proj1/photos', {
+      method: 'POST',
+      headers: { cookie: 'ghs_session=valid' },
+      body: formData,
+    })
+    const res = await POST_PHOTO(postReq, photoParams)
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error).toBe('Bestand te groot (max 15 MB)')
+  })
 })
 
 describe('DELETE /api/surveys/[projectId]/photos/[photoId]', () => {

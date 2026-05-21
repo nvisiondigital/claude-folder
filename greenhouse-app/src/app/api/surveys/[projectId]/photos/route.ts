@@ -34,6 +34,16 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Missing file or slotIndex' }, { status: 400 })
   }
 
+  const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return NextResponse.json({ error: 'Bestandstype niet toegestaan' }, { status: 400 })
+  }
+
+  const MAX_SIZE = 15 * 1024 * 1024
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json({ error: 'Bestand te groot (max 15 MB)' }, { status: 400 })
+  }
+
   const slotIndex = parseInt(slotIndexStr, 10)
   const slotDef = getSlotDef(slotIndex)
   if (!slotDef) {
