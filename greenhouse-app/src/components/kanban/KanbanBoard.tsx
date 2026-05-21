@@ -4,7 +4,10 @@ import useSWR from 'swr'
 import type { Project } from '@prisma/client'
 import KanbanColumn from './KanbanColumn'
 
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+const fetcher = (url: string) => fetch(url).then(r => {
+  if (!r.ok) throw new Error(r.statusText)
+  return r.json()
+})
 
 interface Props {
   onSelect: (p: Project) => void
@@ -12,12 +15,20 @@ interface Props {
 }
 
 export default function KanbanBoard({ onSelect, onAdd }: Props) {
-  const { data: projects = [], isLoading } = useSWR<Project[]>('/api/projects', fetcher, {
+  const { data: projects = [], isLoading, error } = useSWR<Project[]>('/api/projects', fetcher, {
     refreshInterval: 30_000,
   })
 
   if (isLoading) {
     return <div className="flex-1 flex items-center justify-center text-ghs-muted text-sm">Laden...</div>
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-red-400 text-sm">
+        Fout bij laden van projecten. Probeer de pagina te verversen.
+      </div>
+    )
   }
 
   const byCategory = (cat: 'CAT1' | 'CAT2' | 'CAT3') =>
