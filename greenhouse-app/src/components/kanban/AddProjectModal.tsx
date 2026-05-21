@@ -26,16 +26,20 @@ export default function AddProjectModal({ onClose }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        panelCount: form.panelCount ? parseInt(form.panelCount) : undefined,
-      }),
-    })
-    await mutate('/api/projects')
-    onClose()
+    try {
+      await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          panelCount: form.panelCount ? parseInt(form.panelCount) : undefined,
+        }),
+      })
+      await mutate('/api/projects')
+      onClose()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
