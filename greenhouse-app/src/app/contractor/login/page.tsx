@@ -14,16 +14,20 @@ export default function ContractorLoginPage() {
     setError('')
     setLoading(true)
 
-    const res = await fetch('/api/contractor/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    })
-
-    if (res.ok) {
-      router.push('/contractor')
-    } else {
-      setError('Ongeldig wachtwoord. Probeer opnieuw.')
+    try {
+      const res = await fetch('/api/contractor/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      if (res.ok) {
+        router.push('/contractor')
+      } else {
+        setError('Ongeldig wachtwoord. Probeer opnieuw.')
+      }
+    } catch {
+      setError('Verbindingsfout. Probeer opnieuw.')
+    } finally {
       setLoading(false)
     }
   }
