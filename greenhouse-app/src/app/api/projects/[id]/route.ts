@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
 import { getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/auth'
-import { Prisma } from '@prisma/client'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 import type { UpdateProjectInput } from '@/lib/types'
 
 async function getRole() {
@@ -68,7 +68,7 @@ export async function PATCH(
     })
     return NextResponse.json(project)
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+    if (e instanceof PrismaClientKnownRequestError && e.code === 'P2025') {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
     throw e
@@ -87,7 +87,7 @@ export async function DELETE(
     await prisma.project.delete({ where: { id } })
     return NextResponse.json({ ok: true })
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+    if (e instanceof PrismaClientKnownRequestError && e.code === 'P2025') {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
     throw e

@@ -145,7 +145,7 @@ describe('PUT /api/surveys/[projectId]', () => {
 
 import { POST as POST_PHOTO } from '@/app/api/surveys/[projectId]/photos/route'
 import { DELETE as DELETE_PHOTO } from '@/app/api/surveys/[projectId]/photos/[photoId]/route'
-import { Prisma } from '@prisma/client'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 
 const photoParams = { params: Promise.resolve({ projectId: 'proj1' }) }
 const photoIdParams = { params: Promise.resolve({ projectId: 'proj1', photoId: 'photo1' }) }
@@ -264,7 +264,7 @@ describe('DELETE /api/surveys/[projectId]/photos/[photoId]', () => {
 
   it('returns 404 when photo not found', async () => {
     mockPhotoDelete.mockRejectedValueOnce(
-      new Prisma.PrismaClientKnownRequestError('Not found', { code: 'P2025', clientVersion: '0' })
+      new PrismaClientKnownRequestError('Not found', { code: 'P2025', clientVersion: '0' })
     )
 
     const delReq = new NextRequest('http://localhost/api/surveys/proj1/photos/nonexistent', {
