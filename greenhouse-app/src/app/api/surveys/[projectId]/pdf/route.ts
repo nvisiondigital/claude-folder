@@ -5,23 +5,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
 import { getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/auth'
-import { getPhotoBuffer } from '@/lib/photos'
+import { getPhotoDataUri } from '@/lib/photos'
 import { PHOTO_SECTIONS } from '@/lib/survey'
 import type { PdfSection, PdfPhoto } from '@/components/pdf/SurveyPDF'
 
 type Params = { params: Promise<{ projectId: string }> }
 
-function photoDataUri(url: string): string | null {
-  try {
-    const buf = getPhotoBuffer(url)
-    const base64 = buf.toString('base64')
-    const ext = url.split('.').pop()?.toLowerCase() ?? 'jpg'
-    const mime = ext === 'png' ? 'image/png' : 'image/jpeg'
-    return `data:${mime};base64,${base64}`
-  } catch {
-    return null
-  }
-}
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const cookieStore = await cookies()
@@ -55,20 +44,23 @@ export async function GET(_req: NextRequest, { params }: Params) {
     photosBySlot[ph.slotIndex].push(ph)
   }
 
-  const sections: PdfSection[] = PHOTO_SECTIONS.map(sec => {
-    const photos: PdfPhoto[] = []
-    for (const slot of sec.slots) {
-      const slotPhotos = photosBySlot[slot.index] ?? []
-      slotPhotos.forEach((ph, i) => {
-        const uri = photoDataUri(ph.fileUrl)
-        if (!uri) return
-        const suffix = slotPhotos.length > 1 ? String.fromCharCode(97 + i) : ''
-        const padded = String(slot.index).padStart(2, '0')
-        photos.push({ label: `${padded}${suffix} ${slot.name}`, dataUri: uri, order: i })
-      })
-    }
-    return { key: sec.key, label: sec.label, photos, isDrone: sec.key === 'drone' }
-  })
+  const sections: PdfSection[] = await Promise.all(
+    PHOTO_SECTIONS.map(async sec => {
+      const photos: PdfPhoto[] = []
+      for (const slot of sec.slots) {
+        const slotPhotos = photosBySlot[slot.index] ?? []
+        for (let i = 0; i < slotPhotos.length; i++) {
+          const ph = slotPhotos[i]
+          const uri = await getPhotoDataUri(ph.fileUrl)
+          if (!uri) continue
+          const suffix = slotPhotos.length > 1 ? String.fromCharCode(97 + i) : ''
+          const padded = String(slot.index).padStart(2, '0')
+          photos.push({ label: `${padded}${suffix} ${slot.name}`, dataUri: uri, order: i })
+        }
+      }
+      return { key: sec.key, label: sec.label, photos, isDrone: sec.key === 'drone' }
+    })
+  )
 
   const address = `${project.street}, ${project.postalCode} ${project.city}`
   const date = new Date().toLocaleDateString('nl-BE', { day: 'numeric', month: 'long', year: 'numeric' })

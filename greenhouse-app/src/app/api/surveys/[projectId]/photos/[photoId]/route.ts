@@ -23,7 +23,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
   try {
     const photo = await prisma.photo.delete({ where: { id: photoId } })
-    deletePhoto(photo.fileUrl)
+    await deletePhoto(photo.fileUrl)
     return NextResponse.json({ ok: true })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
