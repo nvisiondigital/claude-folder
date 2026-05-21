@@ -10,7 +10,9 @@ neonConfig.webSocketConstructor = ws
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
 function createPrismaClient() {
-  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! })
+  const dbUrl = process.env.DATABASE_URL
+  if (!dbUrl) throw new Error('DATABASE_URL environment variable is not set')
+  const adapter = new PrismaNeon({ connectionString: dbUrl })
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' ? ['error'] : [],
