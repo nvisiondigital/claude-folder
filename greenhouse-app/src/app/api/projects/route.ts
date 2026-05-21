@@ -8,7 +8,7 @@ const REQUIRED_FIELDS: (keyof CreateProjectInput)[] = [
   'clientName', 'email', 'phone', 'street', 'postalCode', 'city', 'category',
 ]
 
-export async function GET() {
+export async function GET(_req: NextRequest) {
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE)?.value
   if (!token || !(await verifyToken(token))) {
