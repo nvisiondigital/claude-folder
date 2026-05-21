@@ -14,6 +14,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     cookieStore.get(SESSION_COOKIE)?.value,
     cookieStore.get(CONTRACTOR_SESSION_COOKIE)?.value,
   )
+  // Both florian and contractor may delete photos — see Plan 3 contractor portal
   if (!role) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

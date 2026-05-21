@@ -23,6 +23,7 @@ vi.mock('@/lib/db', () => ({
 }))
 
 const mockVerifyToken = vi.hoisted(() => vi.fn().mockResolvedValue({ role: 'florian' }))
+const mockGetAuthRole = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/auth', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/auth')>()
@@ -31,10 +32,7 @@ vi.mock('@/lib/auth', async (importOriginal) => {
     verifyToken: mockVerifyToken,
     SESSION_COOKIE: 'ghs_session',
     CONTRACTOR_SESSION_COOKIE: 'ghs_contractor_session',
-    getAuthRole: vi.fn().mockImplementation(
-      (florianToken: string | undefined) =>
-        Promise.resolve(florianToken ? 'florian' : null)
-    ),
+    getAuthRole: mockGetAuthRole,
   }
 })
 
@@ -96,11 +94,13 @@ function setupAuthCookie() {
   mockCookiesGet.mockImplementation((name: string) =>
     name === 'ghs_session' ? { value: 'valid' } : undefined
   )
+  mockGetAuthRole.mockResolvedValue('florian')
 }
 
 // Helper: set up cookies mock to return no token (unauthenticated)
 function setupNoAuthCookie() {
   mockCookiesGet.mockImplementation(() => undefined)
+  mockGetAuthRole.mockResolvedValue(null)
 }
 
 // Reset to authenticated state before each test by default
@@ -126,6 +126,12 @@ describe('GET /api/projects', () => {
     const data = await res.json()
     expect(data.error).toBe('Unauthorized')
   })
+
+  it('returns 401 when authenticated as contractor (florian-only route)', async () => {
+    mockGetAuthRole.mockResolvedValue('contractor')
+    const res = await GET(makeRequest('GET'))
+    expect(res.status).toBe(401)
+  })
 })
 
 describe('POST /api/projects', () => {
@@ -150,6 +156,12 @@ describe('POST /api/projects', () => {
     setupAuthCookie()
     const res = await POST(makeRequest('POST', { clientName: 'Only Name' }))
     expect(res.status).toBe(400)
+  })
+
+  it('returns 401 when authenticated as contractor', async () => {
+    mockGetAuthRole.mockResolvedValue('contractor')
+    const res = await POST(makeRequest('POST', { clientName: 'x', email: 'x@x.be', phone: '0400', street: 'x', postalCode: '9000', city: 'Gent', category: 'CAT1' }))
+    expect(res.status).toBe(401)
   })
 })
 

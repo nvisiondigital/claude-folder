@@ -6,6 +6,7 @@ import { getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/au
 
 type Params = { params: Promise<{ projectId: string }> }
 
+// Both florian and contractor may access survey CRUD — see Plan 3 contractor portal
 async function getAuth() {
   const cookieStore = await cookies()
   return getAuthRole(
