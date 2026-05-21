@@ -1,0 +1,41 @@
+<h2>3 ways we could build this</h2>
+<p class="subtitle">Each approach gets you a working app — the difference is how much it connects to your existing tools</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>⭐ Start standalone, add Teamleader later <span style="font-size:12px;background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:10px;margin-left:8px;">Recommended</span></h3>
+      <p><strong>Phase 1:</strong> Build the full app — Kanban, survey form, PDF, email templates — but Florian enters the project details manually. Works immediately, no API setup needed.</p>
+      <p><strong>Phase 2:</strong> Connect Teamleader so deals flow in automatically. The app is already built, we just add the sync.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Working app in the shortest time</li><li>Can show it to others immediately</li><li>Teamleader integration as an upgrade, not a blocker</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Florian enters project info twice until Phase 2 is done</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>🔗 Full Teamleader integration from day one</h3>
+      <p>We connect to Teamleader's API first. The Kanban automatically fills with deals from the right pipeline stages. Florian never enters project info manually — it's always synced.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>No double data entry at all</li><li>Always in sync with what's in Teamleader</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Longer before anything works (OAuth setup, API testing)</li><li>If Teamleader API has issues, app breaks</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>🎯 Survey form only — solve the core pain first</h3>
+      <p>Skip the Kanban entirely for now. Just build the survey form, photo upload, PDF generation, and email templates. The simplest possible tool that solves Florian's biggest headache today.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Fastest to build and ship</li><li>Immediately useful</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>No project overview — Florian still uses Teamleader for that</li><li>Not as impressive to demo</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

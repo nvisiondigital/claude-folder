@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS — Dispatch Kanban v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #070d0b; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #e2e8e4; min-height: 100vh; overflow-y: auto; }
+  body { padding: 24px; }
+  h2 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 20px; }
+
+  .app { max-width: 980px; margin: 0 auto; border-radius: 14px; border: 1px solid rgba(114,217,70,0.12); box-shadow: 0 0 60px rgba(114,217,70,0.05); overflow: hidden; }
+  .gradient-bar { height: 2px; background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47); opacity: 0.6; }
+  .shell { display: flex; min-height: 560px; }
+
+  .sidebar { width: 52px; background: rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; padding: 14px 0; gap: 6px; flex-shrink: 0; }
+  .logo-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #72D946, #1B4D47); border-radius: 7px; box-shadow: 0 0 10px rgba(114,217,70,0.25); margin-bottom: 10px; }
+  .nav-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: rgba(255,255,255,0.3); cursor: pointer; }
+  .nav-icon.active { background: rgba(114,217,70,0.1); color: #72D946; }
+
+  .main { flex: 1; background: #080e0c; display: flex; flex-direction: column; }
+  .topbar { padding: 13px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); display: flex; align-items: center; gap: 12px; }
+  .topbar-title { font-size: 15px; font-weight: 700; color: #e2e8e4; }
+  .topbar-sub { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .badge-count { background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.2); color: #38bdf8; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; margin-left: auto; }
+
+  .kanban { padding: 16px; display: flex; gap: 14px; flex: 1; }
+  .column { flex: 1; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+  .col-header { padding: 11px 13px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .col-title { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+  .col-count { margin-left: auto; background: rgba(255,255,255,0.07); border-radius: 10px; padding: 1px 7px; font-size: 10px; color: rgba(255,255,255,0.35); }
+  .col-new .col-dot { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); } .col-new .col-title { color: #f87171; }
+  .col-plan .col-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.5); } .col-plan .col-title { color: #f59e0b; }
+  .col-done .col-dot { background: #72D946; box-shadow: 0 0 6px rgba(114,217,70,0.5); } .col-done .col-title { color: #72D946; }
+  .col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+  .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 11px; cursor: pointer; transition: all 0.15s; }
+  .card:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.13); }
+  .card-name { font-size: 12px; font-weight: 700; color: #e2e8e4; margin-bottom: 3px; }
+  .card-address { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 8px; }
+
+  .contractor-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .contractor-chip { display: flex; align-items: center; gap: 5px; background: rgba(114,217,70,0.08); border: 1px solid rgba(114,217,70,0.2); border-radius: 20px; padding: 3px 8px; font-size: 10px; color: #72D946; }
+  .contractor-avatar { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #1B4D47, #72D946); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: white; flex-shrink: 0; }
+  .unassigned-chip { display: flex; align-items: center; gap: 5px; background: rgba(248,113,113,0.07); border: 1px dashed rgba(248,113,113,0.25); border-radius: 20px; padding: 3px 8px; font-size: 10px; color: rgba(248,113,113,0.6); }
+
+  .card-date { font-size: 10px; color: rgba(255,255,255,0.25); display: flex; align-items: center; gap: 4px; }
+  .card-date.set { color: rgba(245,158,11,0.7); }
+  .card-date.done { color: rgba(114,217,70,0.6); }
+
+  .files-link { display: flex; align-items: center; gap: 6px; background: rgba(114,217,70,0.07); border: 1px solid rgba(114,217,70,0.18); border-radius: 6px; padding: 6px 9px; margin-top: 6px; font-size: 11px; color: #72D946; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .files-link:hover { background: rgba(114,217,70,0.14); }
+  .files-count { font-size: 10px; color: rgba(114,217,70,0.6); margin-left: auto; }
+
+  .notes-preview { background: rgba(255,255,255,0.03); border-radius: 5px; padding: 7px 9px; font-size: 10px; color: rgba(255,255,255,0.4); line-height: 1.5; margin-top: 6px; border: 1px solid rgba(255,255,255,0.05); }
+
+  .card-actions { display: flex; gap: 5px; margin-top: 8px; }
+  .card-btn { flex: 1; border-radius: 5px; padding: 5px 6px; font-size: 10px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.45); text-align: center; transition: all 0.12s; }
+  .card-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+  .card-btn.primary { background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.2); color: #38bdf8; }
+  .card-btn.primary:hover { background: rgba(56,189,248,0.14); }
+
+  /* ── NEW: report sent status line ── */
+  .report-sent {
+    display: flex; align-items: center; gap: 5px;
+    margin-top: 8px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    font-style: italic;
+  }
+  .report-sent::before {
+    content: '✉';
+    font-style: normal;
+    font-size: 10px;
+    color: rgba(114,217,70,0.5);
+  }
+
+  .options-row { display: flex; gap: 12px; max-width: 980px; margin: 16px auto 0; }
+  .opt { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt.selected { border-color: #72D946; background: rgba(114,217,70,0.05); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p { font-size: 12px; color: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+
+<h2>Design section 5 — Dispatch kanban v2</h2>
+<p class="subtitle">Completed column now shows "verslag verstuurd op datum" on cards where the report has been sent.</p>
+
+<div class="app">
+  <div class="gradient-bar"></div>
+  <div class="shell">
+
+    <div class="sidebar">
+      <div class="logo-icon"></div>
+      <div class="nav-icon">⊞</div>
+      <div class="nav-icon active">⇢</div>
+      <div class="nav-icon">📅</div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-title">Dispatch</div>
+          <div class="topbar-sub">8 actieve opdrachten bij externe aannemers</div>
+        </div>
+        <div class="badge-count">3 nieuwe opdrachten</div>
+      </div>
+
+      <div class="kanban">
+
+        <!-- COL 1: Nieuw contact -->
+        <div class="column col-new">
+          <div class="col-header">
+            <div class="col-dot"></div>
+            <div class="col-title">Nieuw contact</div>
+            <div class="col-count">3</div>
+          </div>
+          <div class="col-body">
+            <div class="card">
+              <div class="card-name">Els Vermeersch</div>
+              <div class="card-address">📍 Kortrijk · Complex project</div>
+              <div class="contractor-row"><div class="unassigned-chip">⚠ Niet toegewezen</div></div>
+              <div class="card-date">📅 Nog geen afspraak</div>
+              <div class="card-actions"><div class="card-btn primary">✉ Afspraak plannen</div></div>
+            </div>
+            <div class="card">
+              <div class="card-name">Tom Baert</div>
+              <div class="card-address">📍 Hasselt · Verbouwing</div>
+              <div class="contractor-row"><div class="unassigned-chip">⚠ Niet toegewezen</div></div>
+              <div class="card-date">📅 Nog geen afspraak</div>
+              <div class="card-actions"><div class="card-btn primary">✉ Afspraak plannen</div></div>
+            </div>
+            <div class="card">
+              <div class="card-name">Raf Declercq</div>
+              <div class="card-address">📍 Mechelen · Plat dak</div>
+              <div class="contractor-row"><div class="contractor-chip"><div class="contractor-avatar">J</div>Jonas</div></div>
+              <div class="card-date">📅 Nog geen afspraak</div>
+              <div class="card-actions"><div class="card-btn primary">✉ Afspraak plannen</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COL 2: Ingepland -->
+        <div class="column col-plan">
+          <div class="col-header">
+            <div class="col-dot"></div>
+            <div class="col-title">Ingepland</div>
+            <div class="col-count">3</div>
+          </div>
+          <div class="col-body">
+            <div class="card">
+              <div class="card-name">Nathalie Peeters</div>
+              <div class="card-address">📍 Leuven · 20 panelen</div>
+              <div class="contractor-row"><div class="contractor-chip"><div class="contractor-avatar">M</div>Mauro</div></div>
+              <div class="card-date set">📅 Wo 22 mei · 09:00</div>
+              <div class="card-actions"><div class="card-btn">✉ Herinnering</div><div class="card-btn">✉ Wijziging</div></div>
+            </div>
+            <div class="card">
+              <div class="card-name">Dirk Willems</div>
+              <div class="card-address">📍 Gent · Batterij + 16 panelen</div>
+              <div class="contractor-row"><div class="contractor-chip"><div class="contractor-avatar">J</div>Jonas</div></div>
+              <div class="card-date set">📅 Do 23 mei · 13:30</div>
+              <div class="card-actions"><div class="card-btn">✉ Herinnering</div><div class="card-btn">✉ Wijziging</div></div>
+            </div>
+            <div class="card">
+              <div class="card-name">An Bogaert</div>
+              <div class="card-address">📍 Aalst · Nieuwbouw</div>
+              <div class="contractor-row"><div class="contractor-chip"><div class="contractor-avatar">S</div>Sven</div></div>
+              <div class="card-date set">📅 Vr 24 mei · 10:00</div>
+              <div class="card-actions"><div class="card-btn">✉ Herinnering</div><div class="card-btn">✉ Wijziging</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COL 3: Opmeting gedaan -->
+        <div class="column col-done">
+          <div class="col-header">
+            <div class="col-dot"></div>
+            <div class="col-title">Opmeting gedaan</div>
+            <div class="col-count">2</div>
+          </div>
+          <div class="col-body">
+
+            <!-- Report NOT yet sent -->
+            <div class="card">
+              <div class="card-name">Petra Lemmens</div>
+              <div class="card-address">📍 Brugge · 12 panelen</div>
+              <div class="contractor-row"><div class="contractor-chip"><div class="contractor-avatar">M</div>Mauro</div></div>
+              <div class="card-date done">✓ Ingediend op 19 mei</div>
+              <div class="files-link">📎 Bestanden &amp; foto's bekijken <span class="files-count">14 bestanden</span></div>
+              <div class="notes-preview">"Kabeltraject via zijgevel. Meter in berging. Geen bestaande omvormer."</div>
+              <div class="card-actions">
+                <div class="card-btn primary">✉ Verslag sturen</div>
+              </div>
+              <!-- No sent line yet — report not sent -->
+            </div>
+
+            <!-- Report SENT — shows the new line -->
+            <div class="card">
+              <div class="card-name">Ward Stevens</div>
+              <div class="card-address">📍 Turnhout · Plat dak</div>
+              <div class="contractor-row"><div class="contractor-chip"><div class="contractor-avatar">S</div>Sven</div></div>
+              <div class="card-date done">✓ Ingediend op 18 mei</div>
+              <div class="files-link">📎 Bestanden &amp; foto's bekijken <span class="files-count">21 bestanden</span></div>
+              <div class="notes-preview">"Plat dak, bitumen. Omvormer in technische ruimte gelijkvloers."</div>
+              <div class="card-actions">
+                <div class="card-btn">✉ Verslag opnieuw sturen</div>
+              </div>
+              <!-- ✅ Report sent line -->
+              <div class="report-sent">verslag verstuurd op 19 mei 2026</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ Perfect — screen 6</h3>
+    <p>Small italic "verslag verstuurd op datum" line on sent cards. Button changes to "opnieuw sturen".</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Iets aanpassen</h3>
+    <p>Vertel me wat.</p>
+  </div>
+</div>
+
+</body>
+</html>

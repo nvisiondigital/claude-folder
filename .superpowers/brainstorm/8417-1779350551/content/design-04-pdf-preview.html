@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS — PDF Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #070d0b;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    color: #e2e8e4;
+    padding: 24px;
+  }
+  h2 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 20px; }
+
+  /* App chrome */
+  .app {
+    max-width: 980px; margin: 0 auto;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(114,217,70,0.12);
+    box-shadow: 0 0 60px rgba(114,217,70,0.05);
+    display: flex; flex-direction: column; height: 660px;
+  }
+  .gradient-bar { height: 2px; background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47); opacity: 0.6; }
+  .topbar {
+    background: #080e0c; border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .back-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 6px 12px; font-size: 12px; color: rgba(255,255,255,0.5); cursor: pointer; }
+  .topbar-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .topbar-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+  .btn-print { background: linear-gradient(135deg, #72D946, #4aaa28); color: #0a1a08; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 0 12px rgba(114,217,70,0.2); margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .btn-email { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: 8px; display: flex; align-items: center; gap: 6px; }
+
+  /* PDF viewer area */
+  .pdf-viewer {
+    flex: 1; overflow-y: auto;
+    background: #0f0f0f;
+    padding: 24px;
+    display: flex; justify-content: center;
+  }
+
+  /* The actual PDF document */
+  .pdf-doc {
+    background: #ffffff;
+    width: 100%;
+    max-width: 680px;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    overflow: hidden;
+    font-family: 'Inter', Arial, sans-serif;
+    color: #1a1a1a;
+    flex-shrink: 0;
+  }
+
+  /* PDF Header */
+  .pdf-header {
+    background: #1B4D47;
+    padding: 24px 28px 20px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .pdf-logo-row { display: flex; align-items: center; gap: 12px; }
+  .pdf-logo-icon { width: 36px; height: 36px; background: #72D946; border-radius: 8px; flex-shrink: 0; }
+  .pdf-logo-text { font-size: 11px; font-weight: 700; color: white; line-height: 1.4; letter-spacing: 0.5px; text-transform: uppercase; }
+  .pdf-doc-type { text-align: right; }
+  .pdf-doc-title { font-size: 18px; font-weight: 800; color: #72D946; letter-spacing: 0.5px; }
+  .pdf-doc-sub { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Accent bar */
+  .pdf-accent { height: 3px; background: linear-gradient(90deg, #72D946, #1B4D47); }
+
+  /* Client info band */
+  .pdf-client-band {
+    background: #f8f9f8;
+    border-bottom: 1px solid #e8ede8;
+    padding: 14px 28px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .pdf-info-block {}
+  .pdf-info-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 3px; font-weight: 600; }
+  .pdf-info-value { font-size: 12px; font-weight: 600; color: #1a1a1a; }
+
+  /* PDF body */
+  .pdf-body { padding: 22px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+  .pdf-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #1B4D47;
+    padding-bottom: 6px; border-bottom: 2px solid #72D946;
+    margin-bottom: 10px;
+  }
+
+  /* Summary box */
+  .pdf-summary-box {
+    background: #f0f7ee; border-left: 3px solid #72D946;
+    border-radius: 0 6px 6px 0; padding: 12px 14px;
+    font-size: 12px; line-height: 1.6; color: #2a2a2a;
+  }
+
+  /* Measurements table */
+  .pdf-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .pdf-table tr:nth-child(even) td { background: #f8f9f8; }
+  .pdf-table td { padding: 7px 10px; border-bottom: 1px solid #eee; }
+  .pdf-table td:first-child { color: #666; width: 45%; }
+  .pdf-table td:last-child { font-weight: 600; color: #1a1a1a; }
+  .pdf-ok { color: #1B4D47; font-weight: 700; }
+  .pdf-nok { color: #dc2626; font-weight: 700; }
+
+  /* Photo grid in PDF */
+  .pdf-photo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .pdf-photo-item {}
+  .pdf-photo-thumb {
+    width: 100%; aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #e8f0e8, #d0e0d0);
+    border-radius: 5px; border: 1px solid #dde8dd;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 5px;
+    position: relative; overflow: hidden;
+  }
+  .pdf-photo-label { font-size: 9px; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pdf-photo-num { font-size: 9px; color: #999; margin-bottom: 2px; }
+  .multi-badge { position: absolute; top: 5px; right: 5px; background: rgba(27,77,71,0.8); color: white; font-size: 8px; font-weight: 700; padding: 2px 5px; border-radius: 3px; }
+
+  /* PDF footer */
+  .pdf-footer {
+    background: #1B4D47; padding: 12px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .pdf-footer-text { font-size: 9px; color: rgba(255,255,255,0.4); }
+  .pdf-footer-page { font-size: 9px; color: rgba(255,255,255,0.4); }
+
+  /* Approve */
+  .options-row { display: flex; gap: 12px; max-width: 980px; margin: 16px auto 0; }
+  .opt { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p { font-size: 12px; color: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+
+<h2>Design section 4 — PDF output</h2>
+<p class="subtitle">What the generated report looks like. White document, GHS branded, shown in a dark viewer inside the app.</p>
+
+<div class="app">
+  <div class="gradient-bar"></div>
+
+  <div class="topbar">
+    <div class="back-btn">← Terug</div>
+    <div>
+      <div class="topbar-title">Opmeting verslag — Luc Janssen</div>
+      <div class="topbar-sub">Gegenereerd op 20 mei 2026 · 23 foto's</div>
+    </div>
+    <div class="btn-print">🖨 Afdrukken / opslaan</div>
+    <div class="btn-email">✉ Verstuur naar klant</div>
+  </div>
+
+  <div class="pdf-viewer">
+    <div class="pdf-doc">
+
+      <!-- Header -->
+      <div class="pdf-header">
+        <div class="pdf-logo-row">
+          <div class="pdf-logo-icon"></div>
+          <div class="pdf-logo-text">Green House<br>Solutions</div>
+        </div>
+        <div class="pdf-doc-type">
+          <div class="pdf-doc-title">OPMETING VERSLAG</div>
+          <div class="pdf-doc-sub">Technische inspectie · 20/05/2026</div>
+        </div>
+      </div>
+      <div class="pdf-accent"></div>
+
+      <!-- Client band -->
+      <div class="pdf-client-band">
+        <div class="pdf-info-block">
+          <div class="pdf-info-label">Klant</div>
+          <div class="pdf-info-value">Luc Janssen</div>
+        </div>
+        <div class="pdf-info-block">
+          <div class="pdf-info-label">Adres</div>
+          <div class="pdf-info-value">Mechelsesteenweg 142, 2018 Antwerpen</div>
+        </div>
+        <div class="pdf-info-block">
+          <div class="pdf-info-label">Opmeter</div>
+          <div class="pdf-info-value">Florian — GHS</div>
+        </div>
+      </div>
+
+      <div class="pdf-body">
+
+        <!-- Summary -->
+        <div>
+          <div class="pdf-section-title">Samenvatting opmeting</div>
+          <div class="pdf-summary-box">
+            Moeilijk daktraject langs de zijkant van het gebouw. Bestaande installatie is conform. Hoofdzekering 3×40A — voldoende capaciteit. Locatie omvormer vastgelegd in berging naast achterdeur. Kabeltraject loopt via binnenmuur. Klant vraagt batterij te bespreken bij plaatsing.
+          </div>
+        </div>
+
+        <!-- Measurements -->
+        <div>
+          <div class="pdf-section-title">Technische gegevens</div>
+          <table class="pdf-table">
+            <tr><td>Netspanning</td><td>230V / 400V</td></tr>
+            <tr><td>Hoofdzekering</td><td>3×40A</td></tr>
+            <tr><td>Aarding ok?</td><td class="pdf-ok">✓ Ja</td></tr>
+            <tr><td>Elektriciteit ok?</td><td class="pdf-ok">✓ Ja</td></tr>
+            <tr><td>Locatie omvormer</td><td>Berging, naast achterdeur</td></tr>
+            <tr><td>Soort bevestiging</td><td>Muurdoorvoer dakpan</td></tr>
+            <tr><td>Aantal muurdoorvoeren</td><td>2</td></tr>
+            <tr><td>Geschatte lengte DC</td><td>14m</td></tr>
+            <tr><td>Geschatte lengte AC</td><td>9m</td></tr>
+            <tr><td>Internet</td><td>UTP beschikbaar — router berging</td></tr>
+          </table>
+        </div>
+
+        <!-- Photos -->
+        <div>
+          <div class="pdf-section-title">Foto's — Elektrische installatie</div>
+          <div class="pdf-photo-grid">
+            <div class="pdf-photo-item">
+              <div class="pdf-photo-thumb">🚗</div>
+              <div class="pdf-photo-num">Foto 01</div>
+              <div class="pdf-photo-label">Parkeergelegenheid</div>
+            </div>
+            <div class="pdf-photo-item">
+              <div class="pdf-photo-thumb">🔢</div>
+              <div class="pdf-photo-num">Foto 02</div>
+              <div class="pdf-photo-label">Digitale meter / teller</div>
+            </div>
+            <div class="pdf-photo-item">
+              <div class="pdf-photo-thumb">⚡<div class="multi-badge">3 foto's</div></div>
+              <div class="pdf-photo-num">Foto 03a – 03c</div>
+              <div class="pdf-photo-label">Stroomsterkte / hoofdschakelaar</div>
+            </div>
+            <div class="pdf-photo-item">
+              <div class="pdf-photo-thumb">🏠</div>
+              <div class="pdf-photo-num">Foto 04</div>
+              <div class="pdf-photo-label">Omgevingsfoto's el. installatie</div>
+            </div>
+            <div class="pdf-photo-item">
+              <div class="pdf-photo-thumb">📦</div>
+              <div class="pdf-photo-num">Foto 05</div>
+              <div class="pdf-photo-label">Zekeringskast gesloten</div>
+            </div>
+            <div class="pdf-photo-item">
+              <div class="pdf-photo-thumb">⚙️</div>
+              <div class="pdf-photo-num">Foto 06</div>
+              <div class="pdf-photo-label">Zekeringskast geopend</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="pdf-footer">
+        <div class="pdf-footer-text">Green House Solutions · Technisch Opmeting Verslag · Vertrouwelijk</div>
+        <div class="pdf-footer-page">Pagina 1 / 3</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ Looks good — next screen</h3>
+    <p>White document, GHS branded header, summary on top, measurements table, photos in grid.</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Change something</h3>
+    <p>Different layout, colours, photo size, something else?</p>
+  </div>
+</div>
+
+</body>
+</html>

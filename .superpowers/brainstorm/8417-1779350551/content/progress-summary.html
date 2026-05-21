@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS App — Where we are</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #070d0b;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    color: #e2e8e4;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+  h2 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 28px; }
+
+  .progress-bar {
+    height: 2px;
+    background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47);
+    opacity: 0.6;
+    border-radius: 2px;
+    margin-bottom: 28px;
+  }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 800px; margin: 0 auto 28px; }
+
+  .screen-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .screen-card.done { border-color: rgba(114,217,70,0.25); background: rgba(114,217,70,0.04); }
+  .screen-card.next { border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.04); }
+  .screen-card.pending { opacity: 0.5; }
+
+  .card-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px;
+    margin-bottom: 8px; font-weight: 600;
+  }
+  .done .card-label { color: #72D946; }
+  .next .card-label { color: #38bdf8; }
+  .pending .card-label { color: rgba(255,255,255,0.3); }
+
+  .card-title { font-size: 14px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .card-desc { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+
+  .divider { height: 1px; background: rgba(255,255,255,0.05); max-width: 800px; margin: 0 auto 24px; }
+
+  .phase-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: rgba(255,255,255,0.25); max-width: 800px; margin: 0 auto 12px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Greenhouse Solutions — Florian App</h2>
+<p class="subtitle">Design session in progress · 2 screens approved · 6 to go</p>
+<div class="progress-bar"></div>
+
+<div style="max-width:800px;margin:0 auto;">
+  <div class="phase-title">✅ Screens approved</div>
+</div>
+<div class="grid">
+  <div class="screen-card done">
+    <div class="card-label">✓ Screen 1</div>
+    <div class="card-title">Overall app layout</div>
+    <div class="card-desc">Dark sidebar, 3-column kanban, GHS branding, external tool links. Dark mode direction approved.</div>
+  </div>
+  <div class="screen-card done">
+    <div class="card-label">✓ Screen 2</div>
+    <div class="card-title">Project detail panel</div>
+    <div class="card-desc">Slide-in panel with client info, seller notes, action buttons, tool shortcuts, 3 email templates.</div>
+  </div>
+</div>
+
+<div style="max-width:800px;margin:0 auto 12px;">
+  <div class="phase-title">🔵 Up next</div>
+</div>
+<div class="grid">
+  <div class="screen-card next">
+    <div class="card-label">→ Screen 3</div>
+    <div class="card-title">Survey form</div>
+    <div class="card-desc">23 labeled photo upload slots + measurement fields + save button. Florian fills this in on-site.</div>
+  </div>
+  <div class="screen-card next">
+    <div class="card-label">→ Screen 4</div>
+    <div class="card-title">PDF output preview</div>
+    <div class="card-desc">What the generated report looks like — summary on top, photos in order, GHS branded.</div>
+  </div>
+</div>
+
+<div style="max-width:800px;margin:0 auto 12px;">
+  <div class="phase-title">⏳ Still to design</div>
+</div>
+<div class="grid">
+  <div class="screen-card pending">
+    <div class="card-label">Screen 5</div>
+    <div class="card-title">Dispatch kanban</div>
+    <div class="card-desc">New contact → Planned in → Survey completed. Florian's view of external contractor jobs.</div>
+  </div>
+  <div class="screen-card pending">
+    <div class="card-label">Screen 6</div>
+    <div class="card-title">Contractor portal</div>
+    <div class="card-desc">Separate URL, shared password. Claim jobs, upload files, add notes, move stages.</div>
+  </div>
+  <div class="screen-card pending">
+    <div class="card-label">Screen 7</div>
+    <div class="card-title">Email template composer</div>
+    <div class="card-desc">Pre-filled emails for appointment, report delivery, and change discussion.</div>
+  </div>
+  <div class="screen-card pending">
+    <div class="card-label">Screen 8</div>
+    <div class="card-title">Agenda view</div>
+    <div class="card-desc">Google Calendar embedded inside the app.</div>
+  </div>
+</div>
+
+</body>
+</html>

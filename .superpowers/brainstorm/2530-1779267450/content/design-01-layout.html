@@ -1,0 +1,101 @@
+<h2>Design section 1 — Overall app layout</h2>
+<p class="subtitle">The skeleton of the whole app. Does this structure feel right?</p>
+
+<div class="mockup" style="max-width:860px;margin:0 auto;">
+  <div class="mockup-header">Florian's app — desktop view</div>
+  <div class="mockup-body" style="padding:0;display:flex;min-height:480px;font-size:13px;">
+
+    <!-- Sidebar -->
+    <div style="width:200px;background:#1B4D47;color:white;display:flex;flex-direction:column;border-radius:0 0 0 6px;flex-shrink:0;">
+      <!-- Logo -->
+      <div style="padding:16px 14px 12px;border-bottom:1px solid rgba(255,255,255,0.15);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:28px;height:28px;background:#72D946;border-radius:4px;"></div>
+          <div style="font-size:11px;font-weight:700;line-height:1.2;color:white;">GREEN HOUSE<br>SOLUTIONS</div>
+        </div>
+      </div>
+
+      <!-- Nav items -->
+      <nav style="padding:12px 0;flex:1;">
+        <div style="padding:10px 14px;background:rgba(114,217,70,0.2);border-left:3px solid #72D946;color:#72D946;font-weight:600;cursor:pointer;">
+          📋 Mijn Projecten
+        </div>
+        <div style="padding:10px 14px;color:rgba(255,255,255,0.7);cursor:pointer;border-left:3px solid transparent;">
+          🚀 Dispatch
+        </div>
+        <div style="padding:10px 14px;color:rgba(255,255,255,0.7);cursor:pointer;border-left:3px solid transparent;">
+          📅 Agenda
+        </div>
+        <div style="padding:10px 14px 6px;font-size:10px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:8px;letter-spacing:1px;">Externe tools</div>
+        <div style="padding:8px 14px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;">↗ ESDEC</div>
+        <div style="padding:8px 14px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;">↗ Solaredge</div>
+        <div style="padding:8px 14px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;">↗ WebODM</div>
+        <div style="padding:8px 14px;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;">↗ Geopunt</div>
+      </nav>
+
+      <!-- User -->
+      <div style="padding:12px 14px;border-top:1px solid rgba(255,255,255,0.15);font-size:12px;color:rgba(255,255,255,0.6);">
+        👤 Florian
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div style="flex:1;background:#f5f6f8;display:flex;flex-direction:column;border-radius:0 0 6px 0;">
+
+      <!-- Top bar -->
+      <div style="padding:14px 20px;background:white;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-weight:700;color:#1B4D47;font-size:15px;">Mijn Projecten</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">12 actieve projecten</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="background:#f0f0f0;border-radius:6px;padding:6px 12px;font-size:12px;color:#555;">🔍 Zoeken...</div>
+          <div style="background:#72D946;color:white;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">+ Project</div>
+        </div>
+      </div>
+
+      <!-- Kanban columns preview -->
+      <div style="padding:16px;display:flex;gap:12px;flex:1;">
+        <div style="flex:1;background:white;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;">
+          <div style="padding:10px 12px;background:#fff3e0;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:700;color:#e65100;">CAT 1 — Klaar voor inplanning</div>
+          <div style="padding:8px;">
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:11px;margin-bottom:6px;"><div style="font-weight:600;">Jan Pieters</div><div style="color:#888;">Gent • Plaatsing 8 panelen</div></div>
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:11px;"><div style="font-weight:600;">Marie Declercq</div><div style="color:#888;">Brugge • 12 panelen + batterij</div></div>
+          </div>
+        </div>
+        <div style="flex:1;background:white;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;">
+          <div style="padding:10px 12px;background:#e8f5e9;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:700;color:#2e7d32;">CAT 2 — Opmeting intern</div>
+          <div style="padding:8px;">
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:11px;margin-bottom:6px;"><div style="font-weight:600;">Luc Janssen</div><div style="color:#888;">Antwerpen • Moeilijk dak</div><div style="margin-top:4px;"><span style="background:#e8f5e9;color:#2e7d32;padding:2px 6px;border-radius:4px;font-size:10px;">▶ Opmeting starten</span></div></div>
+          </div>
+        </div>
+        <div style="flex:1;background:white;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;">
+          <div style="padding:10px 12px;background:#e3f2fd;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:700;color:#1565c0;">CAT 3 — Extern</div>
+          <div style="padding:8px;">
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:11px;margin-bottom:6px;"><div style="font-weight:600;">Els Vermeersch</div><div style="color:#888;">Kortrijk • Complex project</div><div style="margin-top:4px;"><span style="background:#e3f2fd;color:#1565c0;padding:2px 6px;border-radius:4px;font-size:10px;">→ Stuur naar dispatch</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;max-width:860px;margin-left:auto;margin-right:auto;">
+  <h3>Key decisions in this layout</h3>
+  <div class="options">
+    <div class="option" data-choice="sidebar-good" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>This layout looks right</h3>
+        <p>Sidebar with GHS branding, 3-column Kanban, external tool links in sidebar. Let's continue to the next screen.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="sidebar-change" onclick="toggleSelect(this)">
+      <div class="letter">↺</div>
+      <div class="content">
+        <h3>I'd like to change something</h3>
+        <p>Tell me what feels off — navigation position, column names, something else.</p>
+      </div>
+    </div>
+  </div>
+</div>

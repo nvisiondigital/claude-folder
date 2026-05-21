@@ -45,10 +45,11 @@ export default function LoginPage() {
         >
           <div className="h-0.5 bg-gradient-to-r from-ghs-teal via-ghs-green to-ghs-teal opacity-60 -mx-8 -mt-8 mb-8 rounded-t-2xl" />
 
-          <label className="block text-xs uppercase tracking-widest text-ghs-dim mb-2">
+          <label htmlFor="password" className="block text-xs uppercase tracking-widest text-ghs-dim mb-2">
             Wachtwoord
           </label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
