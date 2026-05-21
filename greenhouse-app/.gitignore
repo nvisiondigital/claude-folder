@@ -44,3 +44,7 @@ next-env.d.ts
 
 # local database files
 *.db
+
+# Photo uploads (dev only)
+/public/uploads/photos/*
+!/public/uploads/photos/.gitkeep
