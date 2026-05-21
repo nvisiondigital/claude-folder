@@ -26,7 +26,16 @@ const mockVerifyToken = vi.hoisted(() => vi.fn().mockResolvedValue({ role: 'flor
 
 vi.mock('@/lib/auth', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/auth')>()
-  return { ...actual, verifyToken: mockVerifyToken, SESSION_COOKIE: 'ghs_session' }
+  return {
+    ...actual,
+    verifyToken: mockVerifyToken,
+    SESSION_COOKIE: 'ghs_session',
+    CONTRACTOR_SESSION_COOKIE: 'ghs_contractor_session',
+    getAuthRole: vi.fn().mockImplementation(
+      (florianToken: string | undefined) =>
+        Promise.resolve(florianToken ? 'florian' : null)
+    ),
+  }
 })
 
 // Mock next/headers cookies()

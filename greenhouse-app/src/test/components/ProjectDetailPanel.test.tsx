@@ -52,12 +52,12 @@ describe('ProjectDetailPanel', () => {
   })
 
   it('shows "Opmeting hervatten" for CAT2 with draft survey', () => {
-    render(<ProjectDetailPanel project={{ ...project, survey: { id: 's1', isDraft: true } }} onClose={vi.fn()} />)
+    render(<ProjectDetailPanel project={{ ...project, survey: { id: 's1', isDraft: true, deliveredAt: null } }} onClose={vi.fn()} />)
     expect(screen.getByText('✏ Opmeting hervatten')).toBeInTheDocument()
   })
 
   it('shows "Rapport bekijken" for CAT2 with completed survey', () => {
-    render(<ProjectDetailPanel project={{ ...project, survey: { id: 's1', isDraft: false } }} onClose={vi.fn()} />)
+    render(<ProjectDetailPanel project={{ ...project, survey: { id: 's1', isDraft: false, deliveredAt: null } }} onClose={vi.fn()} />)
     expect(screen.getByText(/Rapport bekijken/i)).toBeInTheDocument()
   })
 

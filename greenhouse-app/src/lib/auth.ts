@@ -33,3 +33,24 @@ export async function verifyToken(token: string): Promise<{ role: string } | nul
 }
 
 export const SESSION_COOKIE = 'ghs_session'
+export const CONTRACTOR_SESSION_COOKIE = 'ghs_contractor_session'
+
+/**
+ * Check which role is authenticated.
+ * florianToken comes from SESSION_COOKIE, contractorToken from CONTRACTOR_SESSION_COOKIE.
+ * Returns 'florian' | 'contractor' | null.
+ */
+export async function getAuthRole(
+  florianToken: string | undefined,
+  contractorToken: string | undefined,
+): Promise<'florian' | 'contractor' | null> {
+  if (florianToken) {
+    const p = await verifyToken(florianToken)
+    if (p?.role === 'florian') return 'florian'
+  }
+  if (contractorToken) {
+    const p = await verifyToken(contractorToken)
+    if (p?.role === 'contractor') return 'contractor'
+  }
+  return null
+}

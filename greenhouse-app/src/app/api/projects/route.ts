@@ -1,32 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
-import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
+import { getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/auth'
 import type { CreateProjectInput } from '@/lib/types'
 
 const REQUIRED_FIELDS: (keyof CreateProjectInput)[] = [
   'clientName', 'email', 'phone', 'street', 'postalCode', 'city', 'category',
 ]
 
-export async function GET(_req: NextRequest) {
+async function requireFlorian() {
   const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
-  if (!token || !(await verifyToken(token))) {
+  const role = await getAuthRole(
+    cookieStore.get(SESSION_COOKIE)?.value,
+    cookieStore.get(CONTRACTOR_SESSION_COOKIE)?.value,
+  )
+  return role === 'florian'
+}
+
+export async function GET(_req: NextRequest) {
+  if (!(await requireFlorian())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const projects = await prisma.project.findMany({
     where: { status: 'ACTIVE' },
     orderBy: { createdAt: 'desc' },
-    include: { survey: { select: { id: true, isDraft: true } } },
+    include: { survey: { select: { id: true, isDraft: true, deliveredAt: true } } },
   })
   return NextResponse.json(projects)
 }
 
 export async function POST(req: NextRequest) {
-  const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
-  if (!token || !(await verifyToken(token))) {
+  if (!(await requireFlorian())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

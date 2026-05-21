@@ -2,15 +2,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
-import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
+import { getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/auth'
 
 type Params = { params: Promise<{ projectId: string }> }
 
 async function getAuth() {
   const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
-  if (!token) return null
-  return verifyToken(token)
+  return getAuthRole(
+    cookieStore.get(SESSION_COOKIE)?.value,
+    cookieStore.get(CONTRACTOR_SESSION_COOKIE)?.value,
+  )
 }
 
 export async function GET(_req: NextRequest, { params }: Params) {

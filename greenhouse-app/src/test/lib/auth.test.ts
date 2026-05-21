@@ -1,26 +1,36 @@
+// src/test/lib/auth.test.ts
 // @vitest-environment node
-import { describe, it, expect, beforeAll } from 'vitest'
-import { hashPassword, verifyPassword, createToken, verifyToken } from '@/lib/auth'
+import { describe, it, expect } from 'vitest'
+import { createToken, getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/auth'
 
-describe('auth', () => {
-  beforeAll(() => {
-    process.env.JWT_SECRET = 'test-secret-32-chars-exactly-ok!'
-  })
+process.env.JWT_SECRET = 'test-secret-32-chars-long-padding'
 
-  it('hashes and verifies a password', async () => {
-    const hash = await hashPassword('secret123')
-    expect(await verifyPassword('secret123', hash)).toBe(true)
-    expect(await verifyPassword('wrong', hash)).toBe(false)
-  })
-
-  it('creates a JWT token and verifies it', async () => {
+describe('getAuthRole', () => {
+  it('returns florian for a valid florian token', async () => {
     const token = await createToken({ role: 'florian' })
-    const payload = await verifyToken(token)
-    expect(payload?.role).toBe('florian')
+    const role = await getAuthRole(token, undefined)
+    expect(role).toBe('florian')
   })
 
-  it('returns null for an invalid token', async () => {
-    const result = await verifyToken('invalid.token.here')
-    expect(result).toBeNull()
+  it('returns contractor for a valid contractor token', async () => {
+    const token = await createToken({ role: 'contractor' })
+    const role = await getAuthRole(undefined, token)
+    expect(role).toBe('contractor')
+  })
+
+  it('returns null when both tokens are undefined', async () => {
+    const role = await getAuthRole(undefined, undefined)
+    expect(role).toBeNull()
+  })
+
+  it('returns null for a contractor token passed as florian token', async () => {
+    const token = await createToken({ role: 'contractor' })
+    const role = await getAuthRole(token, undefined)
+    expect(role).toBeNull()
+  })
+
+  it('exports correct cookie names', () => {
+    expect(SESSION_COOKIE).toBe('ghs_session')
+    expect(CONTRACTOR_SESSION_COOKIE).toBe('ghs_contractor_session')
   })
 })

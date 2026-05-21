@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
-import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
+import { getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/auth'
 
 export async function GET() {
   const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
-  if (!token || !(await verifyToken(token))) {
+  const role = await getAuthRole(
+    cookieStore.get(SESSION_COOKIE)?.value,
+    cookieStore.get(CONTRACTOR_SESSION_COOKIE)?.value,
+  )
+  if (role !== 'florian') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

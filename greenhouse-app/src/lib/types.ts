@@ -24,6 +24,7 @@ export type UpdateProjectInput = Partial<CreateProjectInput> & {
 export type SurveyStub = {
   id: string
   isDraft: boolean
+  deliveredAt: string | null
 }
 
 export type ProjectWithSurvey = Project & {

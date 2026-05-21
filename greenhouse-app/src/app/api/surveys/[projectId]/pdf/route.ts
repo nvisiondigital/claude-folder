@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
-import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
+import { getAuthRole, SESSION_COOKIE, CONTRACTOR_SESSION_COOKIE } from '@/lib/auth'
 import { getPhotoBuffer } from '@/lib/photos'
 import { PHOTO_SECTIONS } from '@/lib/survey'
 import type { PdfSection, PdfPhoto } from '@/components/pdf/SurveyPDF'
@@ -25,8 +25,11 @@ function photoDataUri(url: string): string | null {
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
-  if (!token || !(await verifyToken(token))) {
+  const role = await getAuthRole(
+    cookieStore.get(SESSION_COOKIE)?.value,
+    cookieStore.get(CONTRACTOR_SESSION_COOKIE)?.value,
+  )
+  if (!role) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
