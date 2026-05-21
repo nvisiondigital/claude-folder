@@ -2,13 +2,14 @@ import type { ProjectWithSurvey } from '@/lib/types'
 import ProjectCard from './ProjectCard'
 
 const COLUMN_STYLES = {
-  CAT1: { dot: 'bg-cat1 shadow-[0_0_6px_rgba(245,158,11,0.5)]', title: 'text-cat1', label: 'CAT 1 — Klaar voor inplanning' },
-  CAT2: { dot: 'bg-cat2 shadow-[0_0_6px_rgba(114,217,70,0.5)]', title: 'text-cat2', label: 'CAT 2 — Opmeting intern' },
-  CAT3: { dot: 'bg-cat3 shadow-[0_0_6px_rgba(56,189,248,0.5)]',  title: 'text-cat3', label: 'CAT 3 — Extern' },
+  CAT1:      { dot: 'bg-cat1 shadow-[0_0_6px_rgba(245,158,11,0.5)]',       title: 'text-cat1',       label: 'CAT 1 — Klaar voor inplanning' },
+  CAT2:      { dot: 'bg-cat2 shadow-[0_0_6px_rgba(114,217,70,0.5)]',       title: 'text-cat2',       label: 'CAT 2 — Opmeting intern' },
+  CAT3:      { dot: 'bg-cat3 shadow-[0_0_6px_rgba(56,189,248,0.5)]',       title: 'text-cat3',       label: 'CAT 3 — Extern' },
+  DELIVERED: { dot: 'bg-purple-400 shadow-[0_0_6px_rgba(192,132,252,0.5)]', title: 'text-purple-400', label: 'Opmeting gedaan' },
 }
 
 interface Props {
-  category: 'CAT1' | 'CAT2' | 'CAT3'
+  category: 'CAT1' | 'CAT2' | 'CAT3' | 'DELIVERED'
   projects: ProjectWithSurvey[]
   onSelect: (p: ProjectWithSurvey) => void
 }

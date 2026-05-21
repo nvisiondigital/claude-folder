@@ -31,8 +31,13 @@ export default function KanbanBoard({ onSelect, onAdd }: Props) {
     )
   }
 
-  const byCategory = (cat: 'CAT1' | 'CAT2' | 'CAT3') =>
-    projects.filter(p => p.category === cat)
+  // Delivered CAT2 projects move to their own column
+  const isDelivered = (p: ProjectWithSurvey) => p.survey?.deliveredAt != null
+
+  const cat1Projects      = projects.filter(p => p.category === 'CAT1')
+  const cat2Projects      = projects.filter(p => p.category === 'CAT2' && !isDelivered(p))
+  const cat3Projects      = projects.filter(p => p.category === 'CAT3')
+  const deliveredProjects = projects.filter(p => p.category === 'CAT2' && isDelivered(p))
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -52,9 +57,10 @@ export default function KanbanBoard({ onSelect, onAdd }: Props) {
 
       {/* Columns */}
       <div className="flex-1 p-4 flex gap-4 overflow-hidden">
-        <KanbanColumn category="CAT1" projects={byCategory('CAT1')} onSelect={onSelect} />
-        <KanbanColumn category="CAT2" projects={byCategory('CAT2')} onSelect={onSelect} />
-        <KanbanColumn category="CAT3" projects={byCategory('CAT3')} onSelect={onSelect} />
+        <KanbanColumn category="CAT1"      projects={cat1Projects}      onSelect={onSelect} />
+        <KanbanColumn category="CAT2"      projects={cat2Projects}      onSelect={onSelect} />
+        <KanbanColumn category="CAT3"      projects={cat3Projects}      onSelect={onSelect} />
+        <KanbanColumn category="DELIVERED" projects={deliveredProjects} onSelect={onSelect} />
       </div>
     </div>
   )
