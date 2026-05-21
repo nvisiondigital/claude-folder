@@ -46,7 +46,7 @@ import { beforeEach } from 'vitest'
 import { GET, POST } from '@/app/api/projects/route'
 import { GET as GET_BY_ID, PATCH, DELETE } from '@/app/api/projects/[id]/route'
 import { NextRequest } from 'next/server'
-import { Prisma } from '@prisma/client'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client'
 
 function makeRequest(method: string, body?: object, includeAuth = true) {
   return new NextRequest('http://localhost/api/projects', {
@@ -211,7 +211,7 @@ describe('DELETE /api/projects/[id]', () => {
   it('returns 404 when project not found', async () => {
     setupAuthCookie()
     mockDelete.mockRejectedValueOnce(
-      new Prisma.PrismaClientKnownRequestError('Not found', {
+      new PrismaClientKnownRequestError('Not found', {
         code: 'P2025',
         clientVersion: '0',
       })
@@ -239,7 +239,7 @@ describe('PATCH /api/projects/[id]', () => {
   it('returns 404 when project not found', async () => {
     setupAuthCookie()
     mockUpdate.mockRejectedValueOnce(
-      new Prisma.PrismaClientKnownRequestError('Not found', {
+      new PrismaClientKnownRequestError('Not found', {
         code: 'P2025',
         clientVersion: '0',
       })
