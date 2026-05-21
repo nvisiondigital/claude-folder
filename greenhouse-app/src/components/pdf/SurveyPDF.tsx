@@ -1,18 +1,11 @@
 // src/components/pdf/SurveyPDF.tsx
 // Server-side only — do NOT add 'use client'
 import {
-  Document, Page, View, Text, Image, StyleSheet, Font,
+  Document, Page, View, Text, Image, StyleSheet,
 } from '@react-pdf/renderer'
 
-Font.register({
-  family: 'Helvetica',
-  src: 'https://fonts.gstatic.com/s/helveticaneue/v70/1Ptsg8zYS_SKggPN4iEgvnHyvveLxVvaooCP.woff2',
-  fontStyle: 'normal',
-})
-
+// GHS brand colours
 const GHS_TEAL  = '#1B4D47'
-const GHS_GREEN = '#72D946'
-const GHS_BG    = '#070d0b'
 
 const styles = StyleSheet.create({
   page: {
@@ -135,9 +128,6 @@ function val(v: string | number | null | undefined): string {
   return String(v)
 }
 
-// Suppress unused variable warnings — kept for reference
-void GHS_GREEN
-void GHS_BG
 
 export default function SurveyPDF({
   clientName, address, date, isDraft, measurements, sections,
@@ -148,7 +138,7 @@ export default function SurveyPDF({
         {/* Draft warning */}
         {isDraft && (
           <View style={styles.draftBanner}>
-            <Text style={styles.draftBannerText}>⚠ CONCEPT — Opmeting niet afgerond</Text>
+            <Text style={styles.draftBannerText}>CONCEPT — Opmeting niet afgerond</Text>
           </View>
         )}
 
