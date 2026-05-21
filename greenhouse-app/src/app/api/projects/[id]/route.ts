@@ -17,12 +17,17 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await getRole())) {
+  const role = await getRole()
+  if (!role) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const { id } = await params
   const project = await prisma.project.findUnique({ where: { id } })
   if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  // Contractors may only read CAT2 projects (they should only survey those)
+  if (role === 'contractor' && project.category !== 'CAT2') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
   return NextResponse.json(project)
 }
 

@@ -42,13 +42,19 @@ export default function ContractorPageClient() {
   }, [])
 
   async function handleDeliver(projectId: string) {
-    const res = await fetch(`/api/surveys/${projectId}/deliver`, { method: 'POST' })
-    if (res.ok) {
-      setProjects(prev => prev.map(p =>
-        p.id === projectId && p.survey
-          ? { ...p, survey: { ...p.survey, deliveredAt: new Date().toISOString() } }
-          : p
-      ))
+    try {
+      const res = await fetch(`/api/surveys/${projectId}/deliver`, { method: 'POST' })
+      if (res.ok) {
+        setProjects(prev => prev.map(p =>
+          p.id === projectId && p.survey
+            ? { ...p, survey: { ...p.survey, deliveredAt: new Date().toISOString() } }
+            : p
+        ))
+      } else {
+        setError('Lever in mislukt. Probeer opnieuw.')
+      }
+    } catch {
+      setError('Verbindingsfout bij lever in.')
     }
   }
 
