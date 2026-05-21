@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SurveyForm from '@/components/survey/SurveyForm'
-import { EMPTY_MEASUREMENTS, type UploadedPhoto, type SurveyMeasurements } from '@/lib/survey'
+import { type UploadedPhoto, type SurveyMeasurements } from '@/lib/survey'
 
 type ProjectInfo = { id: string; clientName: string; category: string }
 
