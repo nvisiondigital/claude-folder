@@ -133,3 +133,98 @@ describe('PUT /api/surveys/[projectId]', () => {
     expect(res.status).toBe(401)
   })
 })
+
+import { POST as POST_PHOTO } from '@/app/api/surveys/[projectId]/photos/route'
+import { DELETE as DELETE_PHOTO } from '@/app/api/surveys/[projectId]/photos/[photoId]/route'
+import { Prisma } from '@prisma/client'
+
+const photoParams = { params: Promise.resolve({ projectId: 'proj1' }) }
+const photoIdParams = { params: Promise.resolve({ projectId: 'proj1', photoId: 'photo1' }) }
+
+const samplePhoto = {
+  id: 'photo1', surveyId: 'survey1', slotIndex: 1,
+  slotName: 'Parkeergelegenheid', fileUrl: '/uploads/photos/s1/photo.jpg', order: 0,
+}
+
+describe('POST /api/surveys/[projectId]/photos', () => {
+  it('uploads photo and returns 201', async () => {
+    mockSurveyFindUnique.mockResolvedValueOnce(sampleSurvey)
+    mockPhotoCount.mockResolvedValueOnce(0)
+    mockPhotoCreate.mockResolvedValueOnce(samplePhoto)
+
+    const formData = new FormData()
+    formData.append('file', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    formData.append('slotIndex', '1')
+
+    const postReq = new NextRequest('http://localhost/api/surveys/proj1/photos', {
+      method: 'POST',
+      headers: { cookie: 'ghs_session=valid' },
+      body: formData,
+    })
+    const res = await POST_PHOTO(postReq, photoParams)
+    expect(res.status).toBe(201)
+    const data = await res.json()
+    expect(data.slotIndex).toBe(1)
+    expect(data.slotName).toBe('Parkeergelegenheid')
+  })
+
+  it('returns 400 for invalid slotIndex', async () => {
+    mockSurveyFindUnique.mockResolvedValueOnce(sampleSurvey)
+
+    const formData = new FormData()
+    formData.append('file', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    formData.append('slotIndex', '99')
+
+    const postReq = new NextRequest('http://localhost/api/surveys/proj1/photos', {
+      method: 'POST',
+      headers: { cookie: 'ghs_session=valid' },
+      body: formData,
+    })
+    const res = await POST_PHOTO(postReq, photoParams)
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 404 when survey not found', async () => {
+    mockSurveyFindUnique.mockResolvedValueOnce(null)
+
+    const formData = new FormData()
+    formData.append('file', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    formData.append('slotIndex', '1')
+
+    const postReq = new NextRequest('http://localhost/api/surveys/proj1/photos', {
+      method: 'POST',
+      headers: { cookie: 'ghs_session=valid' },
+      body: formData,
+    })
+    const res = await POST_PHOTO(postReq, photoParams)
+    expect(res.status).toBe(404)
+  })
+})
+
+describe('DELETE /api/surveys/[projectId]/photos/[photoId]', () => {
+  it('deletes photo and returns ok', async () => {
+    mockPhotoDelete.mockResolvedValueOnce(samplePhoto)
+
+    const delReq = new NextRequest('http://localhost/api/surveys/proj1/photos/photo1', {
+      method: 'DELETE',
+      headers: { cookie: 'ghs_session=valid' },
+    })
+    const res = await DELETE_PHOTO(delReq, photoIdParams)
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.ok).toBe(true)
+  })
+
+  it('returns 404 when photo not found', async () => {
+    mockPhotoDelete.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError('Not found', { code: 'P2025', clientVersion: '0' })
+    )
+
+    const delReq = new NextRequest('http://localhost/api/surveys/proj1/photos/nonexistent', {
+      method: 'DELETE',
+      headers: { cookie: 'ghs_session=valid' },
+    })
+    const res = await DELETE_PHOTO(delReq, { params: Promise.resolve({ projectId: 'proj1', photoId: 'nonexistent' }) })
+    expect(res.status).toBe(404)
+  })
+})
