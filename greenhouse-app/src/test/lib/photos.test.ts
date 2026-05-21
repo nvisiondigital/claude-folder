@@ -1,7 +1,15 @@
 // src/test/lib/photos.test.ts
 // @vitest-environment node
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+// ── Vercel Blob mock ────────────────────────────────────────────────────────
+const { mockPut, mockDel } = vi.hoisted(() => ({
+  mockPut: vi.fn(),
+  mockDel: vi.fn(),
+}))
+vi.mock('@vercel/blob', () => ({ put: mockPut, del: mockDel }))
+
+// ── fs mock ──────────────────────────────────────────────────────────────────
 const {
   mockMkdirSync,
   mockWriteFileSync,
@@ -11,9 +19,9 @@ const {
 } = vi.hoisted(() => ({
   mockMkdirSync:     vi.fn(),
   mockWriteFileSync: vi.fn(),
-  mockExistsSync:    vi.fn(),
+  mockExistsSync:    vi.fn().mockReturnValue(true),
   mockUnlinkSync:    vi.fn(),
-  mockReadFileSync:  vi.fn(),
+  mockReadFileSync:  vi.fn().mockReturnValue(Buffer.from('img-bytes')),
 }))
 
 vi.mock('fs', () => ({
@@ -31,51 +39,122 @@ vi.mock('fs', () => ({
   readFileSync:  mockReadFileSync,
 }))
 
-import { savePhoto, deletePhoto, getPhotoBuffer } from '@/lib/photos'
+// ── helpers ─────────────────────────────────────────────────────────────────
+function makeFile(name = 'photo.jpg', type = 'image/jpeg', bytes = 'img') {
+  return new File([bytes], name, { type })
+}
 
-beforeEach(() => {
-  vi.clearAllMocks()
-  mockExistsSync.mockReturnValue(true)
-  mockReadFileSync.mockReturnValue(Buffer.from('img-data'))
-})
-
-describe('savePhoto', () => {
-  it('saves file and returns URL under /uploads/photos/[surveyId]/', async () => {
-    const file = new File(['img'], 'test.jpg', { type: 'image/jpeg' })
-    const url = await savePhoto('survey-abc', file)
-    expect(url).toMatch(/^\/uploads\/photos\/survey-abc\//)
-    expect(url).toMatch(/\.jpg$/)
-    expect(mockWriteFileSync).toHaveBeenCalledOnce()
-  })
-
-  it('creates the survey subdirectory', async () => {
-    const file = new File(['img'], 'test.png', { type: 'image/png' })
-    await savePhoto('survey-abc', file)
-    expect(mockMkdirSync).toHaveBeenCalledWith(
-      expect.stringContaining('survey-abc'),
-      { recursive: true }
-    )
-  })
-})
-
-describe('deletePhoto', () => {
-  it('unlinks file when it exists', () => {
+// ── tests ───────────────────────────────────────────────────────────────────
+describe('photos.ts — Vercel Blob path (BLOB_READ_WRITE_TOKEN set)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.resetModules()
     mockExistsSync.mockReturnValue(true)
-    deletePhoto('/uploads/photos/survey-abc/x.jpg')
+    mockReadFileSync.mockReturnValue(Buffer.from('img-bytes'))
+    process.env.BLOB_READ_WRITE_TOKEN = 'token-abc'
+  })
+  afterEach(() => {
+    delete process.env.BLOB_READ_WRITE_TOKEN
+  })
+
+  it('savePhoto calls put() and returns blob url', async () => {
+    mockPut.mockResolvedValueOnce({ url: 'https://blob.vercel-storage.com/survey1/abc.jpg' })
+
+    const { savePhoto } = await import('@/lib/photos')
+    const url = await savePhoto('survey1', makeFile())
+
+    expect(mockPut).toHaveBeenCalledOnce()
+    const [blobPath, fileArg, opts] = mockPut.mock.calls[0]
+    expect(blobPath).toMatch(/^survey1\//)
+    expect(fileArg).toBeInstanceOf(File)
+    expect(opts).toMatchObject({ access: 'public' })
+    expect(url).toBe('https://blob.vercel-storage.com/survey1/abc.jpg')
+  })
+
+  it('deletePhoto calls del() with the blob url', async () => {
+    mockDel.mockResolvedValueOnce(undefined)
+
+    const { deletePhoto } = await import('@/lib/photos')
+    await deletePhoto('https://blob.vercel-storage.com/survey1/abc.jpg')
+
+    expect(mockDel).toHaveBeenCalledWith('https://blob.vercel-storage.com/survey1/abc.jpg')
+    expect(mockUnlinkSync).not.toHaveBeenCalled()
+  })
+
+  it('getPhotoDataUri fetches blob url and returns data URI', async () => {
+    const fakeJpeg = new Uint8Array([0xff, 0xd8, 0xff])
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      arrayBuffer: () => Promise.resolve(fakeJpeg.buffer),
+    } as unknown as Response)
+
+    const { getPhotoDataUri } = await import('@/lib/photos')
+    const uri = await getPhotoDataUri('https://blob.vercel-storage.com/s/photo.jpg')
+
+    expect(global.fetch).toHaveBeenCalledWith('https://blob.vercel-storage.com/s/photo.jpg')
+    expect(uri).toMatch(/^data:image\/jpeg;base64,/)
+  })
+
+  it('getPhotoDataUri returns null on fetch error', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({ ok: false } as unknown as Response)
+
+    const { getPhotoDataUri } = await import('@/lib/photos')
+    const uri = await getPhotoDataUri('https://blob.vercel-storage.com/s/missing.jpg')
+
+    expect(uri).toBeNull()
+  })
+})
+
+describe('photos.ts — Filesystem path (no BLOB_READ_WRITE_TOKEN)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.resetModules()
+    mockExistsSync.mockReturnValue(true)
+    mockReadFileSync.mockReturnValue(Buffer.from('img-bytes'))
+    delete process.env.BLOB_READ_WRITE_TOKEN
+  })
+
+  it('savePhoto writes to disk and returns /uploads/ url', async () => {
+    const { savePhoto } = await import('@/lib/photos')
+    const url = await savePhoto('survey1', makeFile())
+
+    expect(mockPut).not.toHaveBeenCalled()
+    expect(mockWriteFileSync).toHaveBeenCalledOnce()
+    expect(url).toMatch(/^\/uploads\/photos\/survey1\//)
+  })
+
+  it('deletePhoto calls unlinkSync for a /uploads/ url', async () => {
+    const { deletePhoto } = await import('@/lib/photos')
+    await deletePhoto('/uploads/photos/survey1/abc.jpg')
+
+    expect(mockDel).not.toHaveBeenCalled()
     expect(mockUnlinkSync).toHaveBeenCalledOnce()
   })
 
-  it('does not throw when file does not exist', () => {
-    mockExistsSync.mockReturnValue(false)
-    expect(() => deletePhoto('/uploads/photos/survey-abc/x.jpg')).not.toThrow()
-    expect(mockUnlinkSync).not.toHaveBeenCalled()
+  it('deletePhoto throws for a path outside /uploads/', async () => {
+    const { deletePhoto } = await import('@/lib/photos')
+    await expect(deletePhoto('/etc/passwd')).rejects.toThrow('Invalid photo path')
   })
-})
 
-describe('getPhotoBuffer', () => {
-  it('returns buffer from public path', () => {
-    const buf = getPhotoBuffer('/uploads/photos/survey-abc/x.jpg')
-    expect(Buffer.isBuffer(buf)).toBe(true)
+  it('getPhotoDataUri reads file and returns data URI', async () => {
+    const { getPhotoDataUri } = await import('@/lib/photos')
+    const uri = await getPhotoDataUri('/uploads/photos/survey1/abc.jpg')
+
     expect(mockReadFileSync).toHaveBeenCalledOnce()
+    expect(uri).toMatch(/^data:image\/jpeg;base64,/)
+  })
+
+  it('getPhotoDataUri returns null on read error', async () => {
+    mockReadFileSync.mockImplementationOnce(() => { throw new Error('ENOENT') })
+
+    const { getPhotoDataUri } = await import('@/lib/photos')
+    const uri = await getPhotoDataUri('/uploads/photos/survey1/missing.jpg')
+
+    expect(uri).toBeNull()
+  })
+
+  it('getPhotoDataUri throws for a path outside /uploads/', async () => {
+    const { getPhotoDataUri } = await import('@/lib/photos')
+    await expect(getPhotoDataUri('/etc/passwd')).rejects.toThrow('Invalid photo path')
   })
 })
