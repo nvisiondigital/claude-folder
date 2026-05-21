@@ -1,12 +1,16 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaNeon } from '@prisma/adapter-neon'
+import { neonConfig } from '@neondatabase/serverless'
+import ws from 'ws'
+
+// Neon's serverless driver uses WebSockets. In Node.js (local dev, Vercel)
+// we provide the 'ws' package; in Edge runtimes it uses native WebSocket.
+neonConfig.webSocketConstructor = ws
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
 function createPrismaClient() {
-  const adapter = new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL ?? 'file:./dev.db',
-  })
+  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! })
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' ? ['error'] : [],

@@ -10,18 +10,19 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@neondatabase/serverless": "^1.1.0",
+    "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@react-pdf/renderer": "^4.5.1",
     "@vercel/blob": "^2.4.0",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.10.0",
     "jose": "^6.2.3",
     "next": "16.2.6",
     "prisma": "^7.8.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "swr": "^2.4.1"
+    "swr": "^2.4.1",
+    "ws": "^8.20.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -29,10 +30,10 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/bcryptjs": "^2.4.6",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^6.0.2",
     "dotenv": "^17.4.2",
     "jsdom": "^29.1.1",
