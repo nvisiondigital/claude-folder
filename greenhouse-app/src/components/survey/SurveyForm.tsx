@@ -30,6 +30,7 @@ export default function SurveyForm({
   )
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [pageUrl, setPageUrl] = useState('')
 
   useEffect(() => { setPageUrl(window.location.href) }, [])
@@ -46,6 +47,7 @@ export default function SurveyForm({
 
   const handleUpload = useCallback(async (slotIndex: number, file: File) => {
     setUploadingSlot(slotIndex)
+    setError(null)
     try {
       const fd = new FormData()
       fd.append('file', file)
@@ -54,15 +56,26 @@ export default function SurveyForm({
       if (!res.ok) throw new Error('Upload mislukt')
       const photo: UploadedPhoto = await res.json()
       setPhotos(prev => [...prev, photo])
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Upload mislukt'
+      setError(msg)
+      console.error('Photo upload failed:', e)
     } finally {
       setUploadingSlot(null)
     }
   }, [projectId])
 
   const handleDelete = useCallback(async (photoId: string) => {
-    const res = await fetch(`/api/surveys/${projectId}/photos/${photoId}`, { method: 'DELETE' })
-    if (!res.ok) throw new Error('Verwijderen mislukt')
-    setPhotos(prev => prev.filter(p => p.id !== photoId))
+    setError(null)
+    try {
+      const res = await fetch(`/api/surveys/${projectId}/photos/${photoId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Verwijderen mislukt')
+      setPhotos(prev => prev.filter(p => p.id !== photoId))
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Verwijderen mislukt'
+      setError(msg)
+      console.error('Photo delete failed:', e)
+    }
   }, [projectId])
 
   async function handleSave(finalize: boolean) {
@@ -145,6 +158,18 @@ export default function SurveyForm({
             Kopieer link
           </button>
         </div>
+        {error && (
+          <p className="text-[11px] text-red-400 shrink-0">
+            {error}
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="ml-2 underline hover:no-underline"
+            >
+              ×
+            </button>
+          </p>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
