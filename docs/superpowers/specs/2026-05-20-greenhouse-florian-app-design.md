@@ -176,6 +176,8 @@ For managing external contractors. Florian sends a CAT 3 project here via "→ S
 
 Florian is the only person who can send the report to the client. The contractor portal has no email functionality.
 
+After Florian sends the report, the card shows a small timestamp note: "Verslag verstuurd op [datum]" — confirming delivery without moving the card to a separate column.
+
 ### Module 4 — Contractor portal
 
 Separate URL (e.g. `/contractor`), protected by a single shared password. Login screen shows GHS branding, shared password field, and the note "Wachtwoord vergeten? Neem contact op met Florian."
