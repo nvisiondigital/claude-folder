@@ -70,7 +70,7 @@ model Survey {
   soortBevestiging     String?
   aantalMuurdoorvoeren Int?
   geschatteLengteDc    String?
-  geschatteLeugteAc    String?
+  geschatteLengteAc    String?
   internet             Boolean?
   internetType         String?
   samenvatting         String?
