@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
+import { verifyToken, SESSION_COOKIE } from '@/lib/auth'
 import type { CreateProjectInput } from '@/lib/types'
 
 const REQUIRED_FIELDS: (keyof CreateProjectInput)[] = [
@@ -7,6 +9,12 @@ const REQUIRED_FIELDS: (keyof CreateProjectInput)[] = [
 ]
 
 export async function GET() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(SESSION_COOKIE)?.value
+  if (!token || !(await verifyToken(token))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const projects = await prisma.project.findMany({
     where: { status: 'ACTIVE' },
     orderBy: { createdAt: 'desc' },
@@ -15,6 +23,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(SESSION_COOKIE)?.value
+  if (!token || !(await verifyToken(token))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   let body: CreateProjectInput
   try {
     body = await req.json()
@@ -23,7 +37,7 @@ export async function POST(req: NextRequest) {
   }
 
   for (const field of REQUIRED_FIELDS) {
-    if (!body[field]) {
+    if (body[field] == null || body[field] === '') {
       return NextResponse.json({ error: `Missing field: ${field}` }, { status: 400 })
     }
   }
