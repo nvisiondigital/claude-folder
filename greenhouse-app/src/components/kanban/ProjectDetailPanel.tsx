@@ -1,23 +1,26 @@
+// src/components/kanban/ProjectDetailPanel.tsx
 'use client'
 
 import { useState } from 'react'
-import type { Project } from '@prisma/client'
+import Link from 'next/link'
+import type { ProjectWithSurvey } from '@/lib/types'
 import EmailComposer, { type EmailTemplate } from '@/components/email/EmailComposer'
 
 const EXTERNAL_TOOLS = [
-  { label: 'ESDEC ↗',      href: (_p: Project) => 'https://my.esdec.com' },
-  { label: 'Solaredge ↗',  href: (_p: Project) => 'https://solaredge.com/solaredge-portal/solution/login' },
-  { label: 'Geopunt ↗',    href: (p: Project) => `https://www.geopunt.be/catalogus#q=${encodeURIComponent(p.street + ' ' + p.city)}` },
-  { label: 'WebODM ↗',     href: (_p: Project) => 'https://webodm.net' },
+  { label: 'ESDEC ↗',     href: (_p: ProjectWithSurvey) => 'https://my.esdec.com' },
+  { label: 'Solaredge ↗', href: (_p: ProjectWithSurvey) => 'https://solaredge.com/solaredge-portal/solution/login' },
+  { label: 'Geopunt ↗',   href: (p: ProjectWithSurvey) => `https://www.geopunt.be/catalogus#q=${encodeURIComponent(p.street + ' ' + p.city)}` },
+  { label: 'WebODM ↗',    href: (_p: ProjectWithSurvey) => 'https://webodm.net' },
 ]
 
 interface Props {
-  project: Project
+  project: ProjectWithSurvey
   onClose: () => void
 }
 
 export default function ProjectDetailPanel({ project, onClose }: Props) {
   const [activeTemplate, setActiveTemplate] = useState<EmailTemplate | null>(null)
+  const surveyDone = project.survey != null && !project.survey.isDraft
 
   return (
     <aside className="w-96 shrink-0 bg-ghs-surface border-l border-white/[0.06] flex flex-col overflow-hidden">
@@ -83,6 +86,42 @@ export default function ProjectDetailPanel({ project, onClose }: Props) {
           </div>
         </section>
 
+        {/* Survey action — CAT2 only */}
+        {project.category === 'CAT2' && (
+          <section className="px-5 py-4 border-b border-white/[0.05]">
+            <p className="text-[9px] uppercase tracking-widest text-white/25 mb-3">Opmeting</p>
+            {surveyDone ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-[11px] text-ghs-green/80 mb-1">
+                  <span>✓</span>
+                  <span>Opmeting afgerond</span>
+                </div>
+                <a
+                  href={`/api/surveys/${project.id}/pdf`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-center bg-white/[0.05] border border-white/[0.08] hover:bg-white/10 rounded-lg px-3 py-2 text-[11px] text-white/60 transition-colors"
+                >
+                  📄 Rapport bekijken (PDF)
+                </a>
+                <Link
+                  href={`/app/survey/${project.id}`}
+                  className="text-center bg-white/[0.03] border border-white/[0.07] hover:border-white/15 rounded-lg px-3 py-2 text-[11px] text-white/35 hover:text-white/60 transition-colors"
+                >
+                  ✏ Opmeting bewerken
+                </Link>
+              </div>
+            ) : (
+              <Link
+                href={`/app/survey/${project.id}`}
+                className="block text-center bg-ghs-green/10 border border-ghs-green/25 hover:bg-ghs-green/15 text-ghs-green rounded-lg px-3 py-2.5 text-[11px] font-semibold transition-colors"
+              >
+                {project.survey?.isDraft ? '✏ Opmeting hervatten' : '▶ Opmeting starten'}
+              </Link>
+            )}
+          </section>
+        )}
+
         {/* External tools */}
         <section className="px-5 py-4 border-b border-white/[0.05]">
           <p className="text-[9px] uppercase tracking-widest text-white/25 mb-3">Externe tools</p>
@@ -116,15 +155,14 @@ export default function ProjectDetailPanel({ project, onClose }: Props) {
                 }`}
               >
                 ✉{' '}
-                {tpl === 'afspraak' && 'Afspraak inplannen'}
-                {tpl === 'verslag'  && 'Verslag doorsturen'}
+                {tpl === 'afspraak'    && 'Afspraak inplannen'}
+                {tpl === 'verslag'     && 'Verslag doorsturen'}
                 {tpl === 'wijzigingen' && 'Wijzigingen bespreken'}
               </button>
             ))}
           </div>
         </section>
 
-        {/* Email composer (inline) */}
         {activeTemplate && (
           <div className="px-5 pb-5">
             <EmailComposer template={activeTemplate} project={project} />

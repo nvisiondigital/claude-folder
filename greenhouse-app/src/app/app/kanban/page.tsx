@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import type { Project } from '@prisma/client'
+import type { ProjectWithSurvey } from '@/lib/types'
 import KanbanBoard from '@/components/kanban/KanbanBoard'
 import ProjectDetailPanel from '@/components/kanban/ProjectDetailPanel'
 import AddProjectModal from '@/components/kanban/AddProjectModal'
 
 export default function KanbanPage() {
-  const [selected, setSelected] = useState<Project | null>(null)
+  const [selected, setSelected] = useState<ProjectWithSurvey | null>(null)
   const [showAdd, setShowAdd] = useState(false)
 
   return (

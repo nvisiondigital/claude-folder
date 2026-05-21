@@ -1,4 +1,4 @@
-import type { Project } from '@prisma/client'
+import type { ProjectWithSurvey } from '@/lib/types'
 
 const CAT_COLOURS = {
   CAT1: { dot: 'bg-cat1 shadow-[0_0_6px_rgba(245,158,11,0.5)]', btn: '' },
@@ -27,13 +27,12 @@ function PrimaryButton({ category }: { category: 'CAT1' | 'CAT2' | 'CAT3' }) {
 }
 
 interface Props {
-  project: Project
-  onSelect: (p: Project) => void
+  project: ProjectWithSurvey
+  onSelect: (p: ProjectWithSurvey) => void
 }
 
 export default function ProjectCard({ project, onSelect }: Props) {
   const colours = CAT_COLOURS[project.category]
-
   return (
     <div
       onClick={() => onSelect(project)}
@@ -42,6 +41,12 @@ export default function ProjectCard({ project, onSelect }: Props) {
       <div className="flex items-center gap-2 mb-1.5">
         <div className={`w-2 h-2 rounded-full shrink-0 ${colours.dot}`} />
         <span className="text-[9px] text-white/25 uppercase tracking-wider">{CAT_LABELS[project.category]}</span>
+        {project.category === 'CAT2' && project.survey && !project.survey.isDraft && (
+          <span className="ml-auto text-[9px] text-ghs-green/70">✓ Opmeting klaar</span>
+        )}
+        {project.category === 'CAT2' && project.survey?.isDraft && (
+          <span className="ml-auto text-[9px] text-amber-400/70">📝 Concept</span>
+        )}
       </div>
       <div className="text-[12px] font-bold text-ghs-text mb-0.5">{project.clientName}</div>
       <div className="text-[11px] text-ghs-muted">

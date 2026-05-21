@@ -1,4 +1,4 @@
-import type { Project } from '@prisma/client'
+import type { ProjectWithSurvey } from '@/lib/types'
 import ProjectCard from './ProjectCard'
 
 const COLUMN_STYLES = {
@@ -9,8 +9,8 @@ const COLUMN_STYLES = {
 
 interface Props {
   category: 'CAT1' | 'CAT2' | 'CAT3'
-  projects: Project[]
-  onSelect: (p: Project) => void
+  projects: ProjectWithSurvey[]
+  onSelect: (p: ProjectWithSurvey) => void
 }
 
 export default function KanbanColumn({ category, projects, onSelect }: Props) {

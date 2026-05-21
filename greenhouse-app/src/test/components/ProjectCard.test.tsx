@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import ProjectCard from '@/components/kanban/ProjectCard'
-import type { Project } from '@prisma/client'
+import type { ProjectWithSurvey } from '@/lib/types'
 
-const baseProject: Project = {
+const baseProject: ProjectWithSurvey = {
   id: '1',
   clientName: 'Jan Janssen',
   email: 'jan@test.be',
@@ -20,6 +20,7 @@ const baseProject: Project = {
   status: 'ACTIVE',
   createdAt: new Date(),
   updatedAt: new Date(),
+  survey: null,
 }
 
 describe('ProjectCard', () => {

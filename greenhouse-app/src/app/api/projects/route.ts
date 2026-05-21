@@ -18,6 +18,7 @@ export async function GET(_req: NextRequest) {
   const projects = await prisma.project.findMany({
     where: { status: 'ACTIVE' },
     orderBy: { createdAt: 'desc' },
+    include: { survey: { select: { id: true, isDraft: true } } },
   })
   return NextResponse.json(projects)
 }

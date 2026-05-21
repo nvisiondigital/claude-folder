@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import type { Project } from '@prisma/client'
+import type { ProjectWithSurvey } from '@/lib/types'
 import KanbanColumn from './KanbanColumn'
 
 const fetcher = (url: string) => fetch(url).then(r => {
@@ -10,12 +10,12 @@ const fetcher = (url: string) => fetch(url).then(r => {
 })
 
 interface Props {
-  onSelect: (p: Project) => void
+  onSelect: (p: ProjectWithSurvey) => void
   onAdd: () => void
 }
 
 export default function KanbanBoard({ onSelect, onAdd }: Props) {
-  const { data: projects = [], isLoading, error } = useSWR<Project[]>('/api/projects', fetcher, {
+  const { data: projects = [], isLoading, error } = useSWR<ProjectWithSurvey[]>('/api/projects', fetcher, {
     refreshInterval: 30_000,
   })
 
