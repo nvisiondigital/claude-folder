@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Client
+  clientName String
+  email      String
+  phone      String
+  street     String
+  postalCode String
+  city       String
+
+  // Project details
+  category    Category
+  panelCount  Int?
+  roofType    String?
+  description String?
+  sellerNotes String?
+
+  // Optional appointment date (for agenda view)
+  appointmentDate DateTime?
+
+  // Status
+  status ProjectStatus @default(ACTIVE)
+
+  // Relations
+  survey      Survey?
+  dispatchJob DispatchJob?
+}
+
+enum Category {
+  CAT1
+  CAT2
+  CAT3
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+// Survey is defined here as a stub — fully implemented in Plan 2
+model Survey {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  isDraft     Boolean   @default(true)
+  submittedAt DateTime?
+  deliveredAt DateTime? // When contractor submitted to Florian
+
+  // Measurement fields (populated in Plan 2)
+  netspanning          String?
+  hoofdzekering        String?
+  aardingOk            Boolean?
+  elektriciteitsOk     Boolean?
+  locatieOmvormer      String?
+  soortBevestiging     String?
+  aantalMuurdoorvoeren Int?
+  geschatteLengteDc    String?
+  geschatteLengteAc    String?
+  internet             Boolean?
+  internetType         String?
+  samenvatting         String?
+
+  photos Photo[]
+}
+
+// Photo is a stub — fully used in Plan 2
+model Photo {
+  id        String @id @default(cuid())
+  surveyId  String
+  survey    Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  slotIndex Int    // 1–23
+  slotName  String
+  fileUrl   String
+  order     Int    @default(0)
+}
+
+// DispatchJob is a stub — fully implemented in Plan 3
+model DispatchJob {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  status          DispatchStatus @default(NEW_CONTACT)
+  contractorName  String?
+  appointmentDate DateTime?
+  notes           String?
+  reportSentAt    DateTime?
+  deliveredAt     DateTime?
+}
+
+enum DispatchStatus {
+  NEW_CONTACT
+  PLANNED_IN
+  SURVEY_COMPLETED
+}
+
+// Session table for auth
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  role      String   @default("florian") // "florian" | "contractor"
+}

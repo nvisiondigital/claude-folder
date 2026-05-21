@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS App — Dark Mode Design</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #070d0b;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    color: #e2e8e4;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e2e8e4;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #6b7c74;
+    margin-bottom: 20px;
+  }
+
+  /* App shell */
+  .app {
+    display: flex;
+    height: 520px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(114, 217, 70, 0.12);
+    box-shadow: 0 0 60px rgba(114, 217, 70, 0.06), 0 0 0 1px rgba(255,255,255,0.03);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 210px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #72D946, #1B4D47);
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(114,217,70,0.3);
+    flex-shrink: 0;
+  }
+  .logo-text {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  nav { padding: 12px 0; flex: 1; }
+
+  .nav-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-item.active {
+    color: #72D946;
+    border-left-color: #72D946;
+    background: linear-gradient(90deg, rgba(114,217,70,0.08), transparent);
+    font-weight: 600;
+  }
+  .nav-item:hover:not(.active) {
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .nav-section-label {
+    padding: 10px 16px 4px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.2);
+    margin-top: 6px;
+  }
+
+  .nav-ext {
+    padding: 7px 16px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-ext:hover { color: rgba(255,255,255,0.55); }
+  .ext-dot {
+    width: 4px; height: 4px;
+    background: rgba(114,217,70,0.4);
+    border-radius: 50%;
+  }
+
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar {
+    width: 24px; height: 24px;
+    background: linear-gradient(135deg, #1B4D47, #72D946);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: white;
+  }
+
+  /* Main area */
+  .main {
+    flex: 1;
+    background: #080e0c;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Top bar */
+  .topbar {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.02);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-title { font-size: 15px; font-weight: 700; color: #e2e8e4; }
+  .topbar-sub { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .search-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #72D946, #4aaa28);
+    color: #0a1a08;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 16px rgba(114,217,70,0.25);
+  }
+
+  /* Kanban */
+  .kanban {
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .column {
+    flex: 1;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .col-header {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .col-title { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+  .col-count {
+    margin-left: auto;
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* CAT colours */
+  .cat1 .col-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.5); }
+  .cat1 .col-title { color: #f59e0b; }
+  .cat2 .col-dot { background: #72D946; box-shadow: 0 0 6px rgba(114,217,70,0.5); }
+  .cat2 .col-title { color: #72D946; }
+  .cat3 .col-dot { background: #38bdf8; box-shadow: 0 0 6px rgba(56,189,248,0.5); }
+  .cat3 .col-title { color: #38bdf8; }
+
+  .col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+  /* Cards */
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .card:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.14);
+  }
+  .card-name { font-size: 12px; font-weight: 600; color: #e2e8e4; margin-bottom: 3px; }
+  .card-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .tag-green { background: rgba(114,217,70,0.1); color: #72D946; border: 1px solid rgba(114,217,70,0.2); }
+  .tag-blue  { background: rgba(56,189,248,0.1);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+
+  /* Gradient line at top */
+  .gradient-bar {
+    height: 2px;
+    background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47);
+    opacity: 0.6;
+  }
+
+  /* Approve options */
+  .options-row {
+    display: flex; gap: 12px; max-width: 900px; margin: 20px auto 0;
+  }
+  .opt {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt.selected { border-color: #72D946; background: rgba(114,217,70,0.06); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p  { font-size: 12px; color: rgba(255,255,255,0.4); }
+</style>
+</head>
+<body>
+
+<h2>Design section 1 — Dark mode layout</h2>
+<p class="subtitle">Minimal, futuristic, gradient accents on Greenhouse Solutions brand colours. Does this feel right?</p>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <div class="logo-text">Green House<br>Solutions</div>
+    </div>
+    <nav>
+      <div class="nav-item active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Mijn Projecten
+      </div>
+      <div class="nav-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Dispatch
+      </div>
+      <div class="nav-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agenda
+      </div>
+      <div class="nav-section-label">Externe tools</div>
+      <div class="nav-ext"><div class="ext-dot"></div>ESDEC ↗</div>
+      <div class="nav-ext"><div class="ext-dot"></div>Solaredge ↗</div>
+      <div class="nav-ext"><div class="ext-dot"></div>WebODM ↗</div>
+      <div class="nav-ext"><div class="ext-dot"></div>Geopunt ↗</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">F</div>
+      Florian
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="gradient-bar"></div>
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Mijn Projecten</div>
+        <div class="topbar-sub">12 actieve projecten</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-box">🔍 &nbsp;Zoeken...</div>
+        <div class="btn-primary">+ Project</div>
+      </div>
+    </div>
+
+    <div class="kanban">
+      <!-- CAT 1 -->
+      <div class="column cat1">
+        <div class="col-header">
+          <div class="col-dot"></div>
+          <div class="col-title">CAT 1 — Klaar voor inplanning</div>
+          <div class="col-count">4</div>
+        </div>
+        <div class="col-body">
+          <div class="card">
+            <div class="card-name">Jan Pieters</div>
+            <div class="card-sub">Gent · 8 panelen</div>
+          </div>
+          <div class="card">
+            <div class="card-name">Marie Declercq</div>
+            <div class="card-sub">Brugge · 12 panelen + batterij</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAT 2 -->
+      <div class="column cat2">
+        <div class="col-header">
+          <div class="col-dot"></div>
+          <div class="col-title">CAT 2 — Opmeting intern</div>
+          <div class="col-count">3</div>
+        </div>
+        <div class="col-body">
+          <div class="card">
+            <div class="card-name">Luc Janssen</div>
+            <div class="card-sub">Antwerpen · Moeilijk dak</div>
+            <div class="card-tag tag-green">▶ Opmeting starten</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAT 3 -->
+      <div class="column cat3">
+        <div class="col-header">
+          <div class="col-dot"></div>
+          <div class="col-title">CAT 3 — Extern</div>
+          <div class="col-count">5</div>
+        </div>
+        <div class="col-body">
+          <div class="card">
+            <div class="card-name">Els Vermeersch</div>
+            <div class="card-sub">Kortrijk · Complex project</div>
+            <div class="card-tag tag-blue">→ Stuur naar dispatch</div>
+          </div>
+          <div class="card">
+            <div class="card-name">Tom Baert</div>
+            <div class="card-sub">Hasselt · Verbouwing</div>
+            <div class="card-tag tag-blue">→ Stuur naar dispatch</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ This is the direction</h3>
+    <p>Dark mode, gradients, minimal. Let's continue to the next screen.</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Tweak something</h3>
+    <p>Tell me what to adjust — darker, different accent colour, different layout.</p>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.opt').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const choice = opt.querySelector('h3').textContent.includes('This is') ? 'approved' : 'change';
+    if (window.__sendEvent) window.__sendEvent({ type: 'click', choice, text: opt.querySelector('h3').textContent });
+  });
+});
+</script>
+
+</body>
+</html>

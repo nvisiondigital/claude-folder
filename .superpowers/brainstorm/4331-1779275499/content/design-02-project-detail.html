@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS — Project Detail</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #070d0b;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    color: #e2e8e4;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h2 { font-size: 18px; font-weight: 600; color: #e2e8e4; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 20px; }
+
+  .app {
+    display: flex;
+    height: 560px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(114,217,70,0.12);
+    box-shadow: 0 0 60px rgba(114,217,70,0.05);
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Sidebar (condensed) */
+  .sidebar {
+    width: 52px;
+    background: rgba(255,255,255,0.03);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #72D946, #1B4D47);
+    border-radius: 7px;
+    box-shadow: 0 0 10px rgba(114,217,70,0.25);
+    margin-bottom: 10px;
+  }
+  .nav-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    color: rgba(255,255,255,0.3);
+    cursor: pointer;
+  }
+  .nav-icon.active {
+    background: rgba(114,217,70,0.1);
+    color: #72D946;
+  }
+
+  .gradient-bar { height: 2px; background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47); opacity: 0.6; }
+
+  /* Main content = kanban (compressed) + detail panel */
+  .main { flex: 1; background: #080e0c; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.02);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-title { font-size: 14px; font-weight: 700; color: #e2e8e4; }
+  .topbar-sub { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+
+  .content-area { flex: 1; display: flex; overflow: hidden; }
+
+  /* Mini kanban */
+  .kanban-mini {
+    width: 220px;
+    flex-shrink: 0;
+    padding: 12px 10px;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+  }
+  .mini-col-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 2px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 4px;
+  }
+  .mini-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .mini-col-title { font-size: 10px; font-weight: 700; letter-spacing: 0.3px; }
+  .cat1 { color: #f59e0b; } .dot1 { background: #f59e0b; box-shadow: 0 0 5px rgba(245,158,11,0.5); }
+  .cat2 { color: #72D946; } .dot2 { background: #72D946; box-shadow: 0 0 5px rgba(114,217,70,0.5); }
+  .cat3 { color: #38bdf8; } .dot3 { background: #38bdf8; box-shadow: 0 0 5px rgba(56,189,248,0.5); }
+
+  .mini-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 7px 9px;
+    font-size: 11px;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+  .mini-card.selected {
+    border-color: #72D946;
+    background: rgba(114,217,70,0.07);
+  }
+  .mini-card-name { font-weight: 600; color: #e2e8e4; margin-bottom: 2px; }
+  .mini-card-sub { color: rgba(255,255,255,0.3); font-size: 10px; }
+
+  /* Detail panel */
+  .detail {
+    flex: 1;
+    padding: 20px 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .detail-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .detail-name { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .detail-address { font-size: 12px; color: rgba(255,255,255,0.4); }
+  .badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    background: rgba(114,217,70,0.12); color: #72D946;
+    border: 1px solid rgba(114,217,70,0.25);
+  }
+
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .info-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .info-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.25); margin-bottom: 4px; }
+  .info-value { font-size: 12px; color: #e2e8e4; font-weight: 500; }
+
+  .section-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    color: rgba(255,255,255,0.25); margin-bottom: 8px;
+  }
+
+  /* Action buttons */
+  .actions { display: flex; flex-direction: column; gap: 8px; }
+  .btn {
+    border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    border: 1px solid transparent; transition: all 0.15s;
+  }
+  .btn-survey {
+    background: linear-gradient(135deg, rgba(114,217,70,0.15), rgba(114,217,70,0.05));
+    border-color: rgba(114,217,70,0.3); color: #72D946;
+  }
+  .btn-survey:hover { background: linear-gradient(135deg, rgba(114,217,70,0.25), rgba(114,217,70,0.1)); }
+
+  .btn-row { display: flex; gap: 8px; }
+  .btn-sm {
+    flex: 1; border-radius: 7px; padding: 8px 10px; font-size: 11px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6); transition: all 0.15s;
+  }
+  .btn-sm:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .btn-ext { color: rgba(255,255,255,0.4); font-size: 10px; }
+
+  /* Email templates */
+  .email-list { display: flex; flex-direction: column; gap: 6px; }
+  .email-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 7px;
+    padding: 9px 12px;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; font-size: 12px; color: rgba(255,255,255,0.6);
+    transition: all 0.15s;
+  }
+  .email-item:hover { border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); }
+  .email-icon { font-size: 14px; }
+  .email-arrow { margin-left: auto; color: rgba(255,255,255,0.2); font-size: 10px; }
+
+  .divider { height: 1px; background: rgba(255,255,255,0.05); }
+
+  /* Notes */
+  .notes-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.6;
+  }
+
+  /* Approve */
+  .options-row { display: flex; gap: 12px; max-width: 960px; margin: 16px auto 0; }
+  .opt {
+    flex: 1; background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+    padding: 14px 16px; cursor: pointer; transition: border-color 0.15s;
+  }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p { font-size: 12px; color: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+
+<h2>Design section 2 — Project detail panel</h2>
+<p class="subtitle">Click a card → a detail panel slides in from the right. Kanban stays visible on the left.</p>
+
+<div class="app">
+  <!-- Collapsed sidebar (icon-only when panel is open) -->
+  <div class="sidebar">
+    <div class="logo-icon"></div>
+    <div class="nav-icon active">⊞</div>
+    <div class="nav-icon">⇢</div>
+    <div class="nav-icon">📅</div>
+  </div>
+
+  <div class="main">
+    <div class="gradient-bar"></div>
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Mijn Projecten</div>
+        <div class="topbar-sub">12 actieve projecten</div>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <!-- Mini kanban -->
+      <div class="kanban-mini">
+        <div class="mini-col-header">
+          <div class="mini-dot dot1"></div>
+          <div class="mini-col-title cat1">CAT 1</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-name">Jan Pieters</div>
+          <div class="mini-card-sub">Gent · 8 panelen</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-name">Marie Declercq</div>
+          <div class="mini-card-sub">Brugge · 12 panelen</div>
+        </div>
+
+        <div class="mini-col-header" style="margin-top:10px;">
+          <div class="mini-dot dot2"></div>
+          <div class="mini-col-title cat2">CAT 2</div>
+        </div>
+        <div class="mini-card selected">
+          <div class="mini-card-name">Luc Janssen</div>
+          <div class="mini-card-sub">Antwerpen · Moeilijk dak</div>
+        </div>
+
+        <div class="mini-col-header" style="margin-top:10px;">
+          <div class="mini-dot dot3"></div>
+          <div class="mini-col-title cat3">CAT 3</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-name">Els Vermeersch</div>
+          <div class="mini-card-sub">Kortrijk · Complex</div>
+        </div>
+      </div>
+
+      <!-- Detail panel -->
+      <div class="detail">
+        <!-- Header -->
+        <div class="detail-header">
+          <div>
+            <div class="detail-name">Luc Janssen</div>
+            <div class="detail-address">📍 Mechelsesteenweg 142, 2018 Antwerpen</div>
+          </div>
+          <div class="badge">CAT 2</div>
+        </div>
+
+        <!-- Info grid -->
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Telefoon</div>
+            <div class="info-value">+32 476 12 34 56</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">E-mail</div>
+            <div class="info-value">luc.janssen@mail.be</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Aantal panelen</div>
+            <div class="info-value">16 panelen</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Type dak</div>
+            <div class="info-value">Schuin · Tegelpan</div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <div class="section-title">Opmerkingen verkoper</div>
+          <div class="notes-box">Moeilijk daktraject langs zijkant. Klant vraagt batterij maar wil eerst de opties bespreken. Asbest nagekeken — negatief.</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Primary action -->
+        <div>
+          <div class="section-title">Actie</div>
+          <div class="actions">
+            <div class="btn btn-survey">
+              <span>▶</span> Opmeting starten
+            </div>
+            <div class="btn-row">
+              <div class="btn-sm"><span>↗</span> ESDEC</div>
+              <div class="btn-sm"><span>↗</span> Solaredge</div>
+              <div class="btn-sm"><span>↗</span> Geopunt</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Email templates -->
+        <div>
+          <div class="section-title">E-mail versturen</div>
+          <div class="email-list">
+            <div class="email-item">
+              <span class="email-icon">📅</span>
+              Afspraak inplannen
+              <span class="email-arrow">→</span>
+            </div>
+            <div class="email-item">
+              <span class="email-icon">📄</span>
+              Verslag doorsturen
+              <span class="email-arrow">→</span>
+            </div>
+            <div class="email-item">
+              <span class="email-icon">💬</span>
+              Wijzigingen bespreken
+              <span class="email-arrow">→</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ This works — next screen</h3>
+    <p>Slide-in panel with client info, action buttons, tool links, and email templates.</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Change the layout</h3>
+    <p>Maybe a full page instead of a panel? Or different sections?</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS — Email composer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #070d0b; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #e2e8e4; min-height: 100vh; overflow-y: auto; }
+  body { padding: 24px; }
+  h2 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 28px; }
+
+  /* ── TRIGGER CONTEXT — project card with 3 buttons ── */
+  .trigger-section { max-width: 900px; margin: 0 auto 28px; }
+  .trigger-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.25); margin-bottom: 10px; }
+  .trigger-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 16px; }
+  .trigger-info { flex: 1; }
+  .trigger-name { font-size: 13px; font-weight: 700; color: #e2e8e4; margin-bottom: 2px; }
+  .trigger-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .email-btns { display: flex; gap: 6px; }
+  .email-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 7px; padding: 7px 11px; font-size: 10px; color: rgba(255,255,255,0.45); cursor: pointer; white-space: nowrap; transition: all 0.12s; }
+  .email-btn:hover { border-color: rgba(114,217,70,0.3); color: rgba(255,255,255,0.7); }
+  .email-btn.active { border-color: rgba(114,217,70,0.4); color: #72D946; background: rgba(114,217,70,0.07); }
+  .arrow-hint { color: rgba(255,255,255,0.15); font-size: 18px; }
+
+  /* ── COMPOSER PANEL ── */
+  .composer-wrap { max-width: 900px; margin: 0 auto; }
+  .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.25); margin-bottom: 10px; }
+
+  .composer { background: #080e0c; border: 1px solid rgba(114,217,70,0.15); border-radius: 14px; overflow: hidden; box-shadow: 0 0 60px rgba(114,217,70,0.06); }
+  .composer-topbar { background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .composer-logo { width: 22px; height: 22px; background: linear-gradient(135deg, #72D946, #1B4D47); border-radius: 6px; flex-shrink: 0; }
+  .composer-title { font-size: 13px; font-weight: 700; color: #fff; flex: 1; }
+  .composer-close { width: 24px; height: 24px; background: rgba(255,255,255,0.06); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: rgba(255,255,255,0.3); cursor: pointer; }
+
+  /* Template tabs */
+  .template-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .tab { flex: 1; padding: 10px 12px; font-size: 11px; color: rgba(255,255,255,0.35); cursor: pointer; text-align: center; border-bottom: 2px solid transparent; transition: all 0.12s; }
+  .tab.active { color: #72D946; border-bottom-color: #72D946; background: rgba(114,217,70,0.04); }
+  .tab:hover:not(.active) { color: rgba(255,255,255,0.6); }
+
+  /* Email fields */
+  .email-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .field-row { display: flex; align-items: flex-start; gap: 12px; }
+  .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.25); width: 60px; flex-shrink: 0; padding-top: 9px; }
+  .field-val { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 8px 12px; font-size: 12px; color: rgba(255,255,255,0.7); }
+  .field-val.to { color: #e2e8e4; font-weight: 500; }
+  .field-divider { height: 1px; background: rgba(255,255,255,0.05); }
+
+  /* Merge tags */
+  .merge { display: inline-block; background: rgba(114,217,70,0.12); border: 1px solid rgba(114,217,70,0.25); border-radius: 4px; padding: 0px 5px; font-size: 11px; color: #72D946; font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap; }
+
+  /* Body textarea styled */
+  .body-field { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 12px; font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.7; font-family: inherit; }
+  .body-text { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.8; }
+  .body-text .greeting { color: rgba(255,255,255,0.75); }
+  .body-text .sig { color: rgba(255,255,255,0.35); margin-top: 12px; display: block; }
+
+  /* Attachment */
+  .attachment-row { display: flex; align-items: flex-start; gap: 12px; }
+  .attach-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.25); width: 60px; flex-shrink: 0; padding-top: 8px; }
+  .attach-chip { display: flex; align-items: center; gap: 7px; background: rgba(114,217,70,0.07); border: 1px solid rgba(114,217,70,0.2); border-radius: 7px; padding: 7px 11px; }
+  .attach-icon { font-size: 16px; }
+  .attach-name { font-size: 11px; color: rgba(255,255,255,0.6); }
+  .attach-size { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 1px; }
+  .attach-auto { font-size: 9px; color: rgba(114,217,70,0.5); margin-top: 1px; }
+
+  /* Send bar */
+  .send-bar { background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.06); padding: 12px 20px; display: flex; align-items: center; gap: 10px; }
+  .btn-send { background: linear-gradient(135deg, #72D946, #4aaa28); color: #0a1a08; font-weight: 700; border-radius: 8px; padding: 9px 20px; font-size: 12px; cursor: pointer; box-shadow: 0 0 14px rgba(114,217,70,0.25); white-space: nowrap; }
+  .btn-copy { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; font-size: 11px; color: rgba(255,255,255,0.4); cursor: pointer; }
+  .send-note { font-size: 10px; color: rgba(255,255,255,0.2); margin-left: auto; }
+
+  /* ── ALL THREE TEMPLATES preview row ── */
+  .templates-row { max-width: 900px; margin: 28px auto 0; display: flex; gap: 12px; }
+  .tpl-card { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px; }
+  .tpl-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(114,217,70,0.1); border: 1px solid rgba(114,217,70,0.2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #72D946; margin-bottom: 8px; }
+  .tpl-name { font-size: 12px; font-weight: 700; color: #e2e8e4; margin-bottom: 4px; }
+  .tpl-desc { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.5; }
+  .tpl-tag { display: inline-block; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 2px 8px; font-size: 9px; color: rgba(255,255,255,0.3); margin-top: 8px; }
+  .tpl-tag.has-pdf { background: rgba(114,217,70,0.07); border-color: rgba(114,217,70,0.2); color: rgba(114,217,70,0.6); }
+
+  .options-row { display: flex; gap: 12px; max-width: 900px; margin: 20px auto 0; }
+  .opt { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt.selected { border-color: #72D946; background: rgba(114,217,70,0.05); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h2>Design section 7 — Email template composer</h2>
+<p class="subtitle">3 vooraf ingevulde mails die Florian vanuit elke projectkaart kan openen. Klantgegevens worden automatisch ingevuld.</p>
+
+<!-- TRIGGER: project card with 3 email buttons -->
+<div class="trigger-section">
+  <div class="trigger-label">Trigger — 3 knoppen zichtbaar op elke projectkaart</div>
+  <div class="trigger-card">
+    <div class="trigger-info">
+      <div class="trigger-name">Nathalie Peeters</div>
+      <div class="trigger-sub">Leuven · 20 panelen · nathalie.peeters@gmail.com</div>
+    </div>
+    <div class="email-btns">
+      <div class="email-btn active">✉ Afspraak inplannen</div>
+      <div class="email-btn">✉ Verslag doorsturen</div>
+      <div class="email-btn">✉ Wijzigingen bespreken</div>
+    </div>
+    <div class="arrow-hint">→</div>
+  </div>
+</div>
+
+<!-- COMPOSER — showing template 1: Afspraak inplannen -->
+<div class="composer-wrap">
+  <div class="section-label">Composer — Template 1: Afspraak inplannen (actief)</div>
+  <div class="composer">
+    <div class="composer-topbar">
+      <div class="composer-logo"></div>
+      <div class="composer-title">Nieuwe e-mail</div>
+      <div class="composer-close">✕</div>
+    </div>
+
+    <!-- 3 template tabs -->
+    <div class="template-tabs">
+      <div class="tab active">✉ Afspraak inplannen</div>
+      <div class="tab">✉ Verslag doorsturen</div>
+      <div class="tab">✉ Wijzigingen bespreken</div>
+    </div>
+
+    <div class="email-body">
+
+      <!-- TO -->
+      <div class="field-row">
+        <div class="field-label">Aan</div>
+        <div class="field-val to">nathalie.peeters@gmail.com</div>
+      </div>
+
+      <!-- SUBJECT -->
+      <div class="field-row">
+        <div class="field-label">Onderwerp</div>
+        <div class="field-val">Afspraak opmeting zonnepanelen — <span class="merge">Nathalie Peeters</span></div>
+      </div>
+
+      <div class="field-divider"></div>
+
+      <!-- BODY -->
+      <div class="field-row" style="align-items:flex-start;">
+        <div class="field-label" style="padding-top:4px;">Bericht</div>
+        <div class="body-field">
+          <div class="body-text">
+            <span class="greeting">Beste <span class="merge">Nathalie</span>,</span><br><br>
+            We willen graag een afspraak inplannen voor de opmeting van uw installatie op <span class="merge">Naamsestraat 88, 3000 Leuven</span>.<br><br>
+            Zou een van de volgende momenten passen voor u?<br><br>
+            &nbsp;&nbsp;• <span class="merge">Datum voorstel 1</span><br>
+            &nbsp;&nbsp;• <span class="merge">Datum voorstel 2</span><br><br>
+            Gelieve te laten weten welk moment het beste uitkomt, of stel gerust een alternatief voor.<br><br>
+            Met vriendelijke groeten,<br>
+            <span class="sig">Florian<br>Greenhouse Solutions<br>florian@greenhouse-solutions.be · +32 ...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SEND BAR -->
+    <div class="send-bar">
+      <div class="btn-send">✉ Versturen via Outlook</div>
+      <div class="btn-copy">📋 Kopieer tekst</div>
+      <div class="send-note">Opent je Outlook met dit bericht klaarstaan</div>
+    </div>
+  </div>
+</div>
+
+<!-- ALL THREE TEMPLATES OVERVIEW -->
+<div class="templates-row">
+  <div class="tpl-card">
+    <div class="tpl-num">1</div>
+    <div class="tpl-name">Afspraak inplannen</div>
+    <div class="tpl-desc">Vraag beschikbaarheid bij de klant voor een plaatsbezoek. Datumvelden zijn bewerkbaar voor Florian.</div>
+    <span class="tpl-tag">Geen bijlage</span>
+  </div>
+  <div class="tpl-card">
+    <div class="tpl-num">2</div>
+    <div class="tpl-name">Verslag doorsturen</div>
+    <div class="tpl-desc">Stuur het ingevulde opmetingsverslag door ter ondertekening. PDF wordt automatisch meegestuurd.</div>
+    <span class="tpl-tag has-pdf">📄 PDF auto-bijlage</span>
+  </div>
+  <div class="tpl-card">
+    <div class="tpl-num">3</div>
+    <div class="tpl-name">Wijzigingen bespreken</div>
+    <div class="tpl-desc">Follow-up wanneer de klant aanpassingen vraagt aan het verslag. Verwijst naar het oorspronkelijke document.</div>
+    <span class="tpl-tag">Geen bijlage</span>
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ Looks good — screen 8</h3>
+    <p>3 tabs · klantgegevens auto-ingevuld · groene merge-tags zichtbaar · Outlook knop + kopieer-optie · PDF auto-bijlage bij template 2.</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Iets aanpassen</h3>
+    <p>Vertel me wat.</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS — PDF Preview v4</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: #070d0b;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    color: #e2e8e4;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+  body { padding: 24px; }
+
+  h2 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 20px; }
+
+  /* App chrome — no fixed height, natural flow */
+  .app {
+    max-width: 980px; margin: 0 auto;
+    border-radius: 14px;
+    border: 1px solid rgba(114,217,70,0.12);
+    box-shadow: 0 0 60px rgba(114,217,70,0.05);
+    overflow: visible;
+  }
+
+  .gradient-bar { height: 2px; background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47); opacity: 0.6; border-radius: 14px 14px 0 0; }
+
+  .topbar {
+    background: #080e0c;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 20px;
+    display: flex; align-items: center; gap: 12px;
+    border-radius: 0;
+    flex-wrap: wrap;
+  }
+  .back-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 6px 12px; font-size: 12px; color: rgba(255,255,255,0.5); cursor: pointer; white-space: nowrap; }
+  .topbar-info { flex: 1; min-width: 160px; }
+  .topbar-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .topbar-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+  .status-complete { background: rgba(114,217,70,0.1); border: 1px solid rgba(114,217,70,0.25); color: #72D946; border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .btn-save { background: linear-gradient(135deg, #72D946, #4aaa28); color: #0a1a08; border-radius: 8px; padding: 8px 18px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 0 12px rgba(114,217,70,0.2); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .btn-email { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+
+  /* PDF viewer — natural height, scrolls with page */
+  .pdf-viewer {
+    background: #111;
+    padding: 28px 24px;
+    display: flex;
+    justify-content: center;
+    border-radius: 0 0 14px 14px;
+  }
+
+  /* The PDF document */
+  .pdf-doc {
+    background: #fff;
+    width: 100%;
+    max-width: 620px;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+    overflow: hidden;
+    font-family: 'Inter', Arial, sans-serif;
+    color: #1a1a1a;
+  }
+
+  .pdf-header { background: #1B4D47; padding: 22px 28px 18px; display: flex; align-items: flex-start; justify-content: space-between; }
+  .pdf-logo-row { display: flex; align-items: center; gap: 12px; }
+  .pdf-logo-icon { width: 34px; height: 34px; background: #72D946; border-radius: 7px; flex-shrink: 0; }
+  .pdf-logo-text { font-size: 10px; font-weight: 700; color: white; line-height: 1.4; letter-spacing: 0.5px; text-transform: uppercase; }
+  .pdf-doc-title { font-size: 17px; font-weight: 800; color: #72D946; }
+  .pdf-doc-sub { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; }
+  .pdf-accent { height: 3px; background: linear-gradient(90deg, #72D946, #1B4D47); }
+
+  .pdf-client-band { background: #f8f9f8; border-bottom: 1px solid #e5ede5; padding: 12px 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .pdf-info-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 3px; font-weight: 600; }
+  .pdf-info-value { font-size: 11px; font-weight: 600; color: #1a1a1a; }
+
+  .pdf-body { padding: 22px 28px; display: flex; flex-direction: column; gap: 22px; }
+
+  .pdf-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1B4D47; padding-bottom: 6px; border-bottom: 2px solid #72D946; margin-bottom: 12px; }
+  .pdf-section-note { font-size: 10px; color: #999; font-style: italic; margin-top: -8px; margin-bottom: 12px; }
+
+  .pdf-summary-box { background: #f0f7ee; border-left: 3px solid #72D946; border-radius: 0 6px 6px 0; padding: 12px 14px; font-size: 12px; line-height: 1.65; color: #2a2a2a; }
+
+  .pdf-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .pdf-table tr:nth-child(even) td { background: #f8f9f8; }
+  .pdf-table td { padding: 7px 10px; border-bottom: 1px solid #eee; }
+  .pdf-table td:first-child { color: #666; width: 48%; }
+  .pdf-table td:last-child { font-weight: 600; color: #1a1a1a; }
+  .ok { color: #1B4D47; font-weight: 700; }
+
+  /* 2-column photo grid */
+  .photo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .photo-item {}
+  .photo-thumb {
+    width: 100%; aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #ddeedd, #c5d9c5);
+    border-radius: 6px; border: 1px solid #ccdacc;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; margin-bottom: 7px;
+    position: relative; overflow: hidden;
+  }
+  .photo-caption { display: flex; align-items: baseline; gap: 7px; }
+  .photo-num { font-size: 9px; font-weight: 700; color: #1B4D47; background: #e5f0e5; border-radius: 3px; padding: 1px 5px; flex-shrink: 0; }
+  .photo-label { font-size: 10px; color: #333; font-weight: 600; }
+  .multi-badge { position: absolute; top: 6px; right: 6px; background: rgba(27,77,71,0.85); color: #fff; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+
+  /* Full-width photo (drone) */
+  .photo-full { margin-bottom: 14px; }
+  .photo-full .photo-thumb { aspect-ratio: 16/9; font-size: 52px; }
+
+  .pdf-footer { background: #1B4D47; padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; margin-top: 0; }
+  .pdf-footer-text { font-size: 9px; color: rgba(255,255,255,0.4); }
+  .pdf-footer-page { font-size: 9px; color: rgba(255,255,255,0.4); }
+
+  /* Size note */
+  .size-note {
+    max-width: 980px; margin: 16px auto 0;
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 14px 18px;
+    display: flex; gap: 0; font-size: 12px; flex-wrap: wrap;
+  }
+  .size-col { flex: 1; min-width: 180px; padding: 0 16px; border-right: 1px solid rgba(255,255,255,0.06); }
+  .size-col:first-child { padding-left: 0; }
+  .size-col:last-child { border-right: none; }
+  .size-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+  .size-val { font-weight: 700; color: #e2e8e4; font-size: 13px; }
+  .size-sub { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+  .green { color: #72D946; }
+
+  /* Approve */
+  .options-row { display: flex; gap: 12px; max-width: 980px; margin: 14px auto 0; }
+  .opt { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt.selected { border-color: #72D946; background: rgba(114,217,70,0.05); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p { font-size: 12px; color: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+
+<h2>Design section 4 — PDF output v4 (scrollable)</h2>
+<p class="subtitle">2-column photos for detail shots · Full-width for drone overview · Save button only · No fixed height — scroll freely</p>
+
+<div class="app">
+  <div class="gradient-bar"></div>
+
+  <div class="topbar">
+    <div class="back-btn">← Terug</div>
+    <div class="topbar-info">
+      <div class="topbar-title">Opmeting verslag — Luc Janssen</div>
+      <div class="topbar-sub">Opgeslagen 20 mei 2026 · 23/23 foto's</div>
+    </div>
+    <div class="status-complete">✓ Volledig</div>
+    <div class="btn-save">💾 Opslaan</div>
+    <div class="btn-email">✉ Verstuur naar klant</div>
+  </div>
+
+  <div class="pdf-viewer">
+    <div class="pdf-doc">
+
+      <!-- Header -->
+      <div class="pdf-header">
+        <div class="pdf-logo-row">
+          <div class="pdf-logo-icon"></div>
+          <div class="pdf-logo-text">Green House<br>Solutions</div>
+        </div>
+        <div>
+          <div class="pdf-doc-title">OPMETING VERSLAG</div>
+          <div class="pdf-doc-sub">Technische inspectie · 20/05/2026</div>
+        </div>
+      </div>
+      <div class="pdf-accent"></div>
+
+      <!-- Client band -->
+      <div class="pdf-client-band">
+        <div><div class="pdf-info-label">Klant</div><div class="pdf-info-value">Luc Janssen</div></div>
+        <div><div class="pdf-info-label">Adres</div><div class="pdf-info-value">Mechelsesteenweg 142, Antwerpen</div></div>
+        <div><div class="pdf-info-label">Opmeter</div><div class="pdf-info-value">Florian — GHS</div></div>
+      </div>
+
+      <div class="pdf-body">
+
+        <!-- Summary -->
+        <div>
+          <div class="pdf-section-title">Samenvatting opmeting</div>
+          <div class="pdf-summary-box">Moeilijk daktraject langs de zijkant. Bestaande installatie is conform. Hoofdzekering 3×40A — voldoende capaciteit. Locatie omvormer vastgelegd in berging naast achterdeur. Klant vraagt batterij te bespreken bij plaatsing.</div>
+        </div>
+
+        <!-- Measurements -->
+        <div>
+          <div class="pdf-section-title">Technische gegevens</div>
+          <table class="pdf-table">
+            <tr><td>Netspanning</td><td>230V / 400V</td></tr>
+            <tr><td>Hoofdzekering</td><td>3×40A</td></tr>
+            <tr><td>Aarding ok?</td><td class="ok">✓ Ja</td></tr>
+            <tr><td>Elektriciteit ok?</td><td class="ok">✓ Ja</td></tr>
+            <tr><td>Locatie omvormer</td><td>Berging, naast achterdeur</td></tr>
+            <tr><td>Soort bevestiging</td><td>Muurdoorvoer dakpan</td></tr>
+            <tr><td>Aantal muurdoorvoeren</td><td>2</td></tr>
+            <tr><td>Geschatte lengte DC / AC</td><td>14m / 9m</td></tr>
+            <tr><td>Internet</td><td>UTP beschikbaar — router berging</td></tr>
+          </table>
+        </div>
+
+        <!-- Electrical photos — 2 col -->
+        <div>
+          <div class="pdf-section-title">Foto's — Elektrische installatie</div>
+          <div class="pdf-section-note">Foto's 01 – 11</div>
+          <div class="photo-grid-2">
+            <div class="photo-item">
+              <div class="photo-thumb">🚗</div>
+              <div class="photo-caption"><span class="photo-num">01</span><span class="photo-label">Parkeergelegenheid</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">🔢</div>
+              <div class="photo-caption"><span class="photo-num">02</span><span class="photo-label">Digitale meter / teller</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">⚡<div class="multi-badge">3 foto's</div></div>
+              <div class="photo-caption"><span class="photo-num">03a–c</span><span class="photo-label">Stroomsterkte / hoofdschakelaar</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">🏡</div>
+              <div class="photo-caption"><span class="photo-num">04</span><span class="photo-label">Omgevingsfoto's el. installatie</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">📦</div>
+              <div class="photo-caption"><span class="photo-num">05</span><span class="photo-label">Zekeringskast gesloten</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">⚙️</div>
+              <div class="photo-caption"><span class="photo-num">06</span><span class="photo-label">Zekeringskast geopend</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">🔌</div>
+              <div class="photo-caption"><span class="photo-num">07</span><span class="photo-label">Hoofd en gevoelige differentieel</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">🔋</div>
+              <div class="photo-caption"><span class="photo-num">08</span><span class="photo-label">Aardingsonderbreker</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Installation photos — 2 col -->
+        <div>
+          <div class="pdf-section-title">Foto's — Te plaatsen installatie</div>
+          <div class="pdf-section-note">Foto's 16 – 18</div>
+          <div class="photo-grid-2">
+            <div class="photo-item">
+              <div class="photo-thumb">📡</div>
+              <div class="photo-caption"><span class="photo-num">16</span><span class="photo-label">Modem / router</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">🔧</div>
+              <div class="photo-caption"><span class="photo-num">17</span><span class="photo-label">Locatie omvormer / batterij</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">🛤️<div class="multi-badge">2 foto's</div></div>
+              <div class="photo-caption"><span class="photo-num">18a–b</span><span class="photo-label">Locaties kabeltraject</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drone photos — full width -->
+        <div>
+          <div class="pdf-section-title">Foto's — Daksituatie (drone)</div>
+          <div class="pdf-section-note">Foto's 19 – 23 · Overzichtsfoto's op volledige breedte</div>
+
+          <div class="photo-full">
+            <div class="photo-thumb" style="font-size:52px;">🚁<div class="multi-badge">Drone</div></div>
+            <div class="photo-caption" style="margin-top:7px;"><span class="photo-num">19</span><span class="photo-label">Dakvlakken — overzicht</span></div>
+          </div>
+
+          <div class="photo-full">
+            <div class="photo-thumb" style="font-size:52px;">🏘️</div>
+            <div class="photo-caption" style="margin-top:7px;"><span class="photo-num">20</span><span class="photo-label">Omgevingsfoto's</span></div>
+          </div>
+
+          <div class="photo-grid-2">
+            <div class="photo-item">
+              <div class="photo-thumb">🏠</div>
+              <div class="photo-caption"><span class="photo-num">21</span><span class="photo-label">Nok en dakgoot</span></div>
+            </div>
+            <div class="photo-item">
+              <div class="photo-thumb">🔍</div>
+              <div class="photo-caption"><span class="photo-num">22</span><span class="photo-label">Dakpan close-up</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pdf-footer">
+        <div class="pdf-footer-text">Green House Solutions · Technisch Opmeting Verslag · Vertrouwelijk</div>
+        <div class="pdf-footer-page">Pagina 3 / 3</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Size comparison -->
+<div class="size-note">
+  <div class="size-col">
+    <div class="size-label">3 kolommen (oud)</div>
+    <div class="size-val">~50mm per foto</div>
+    <div class="size-sub">Details moeilijk zichtbaar</div>
+  </div>
+  <div class="size-col">
+    <div class="size-label">2 kolommen — detail foto's ✓</div>
+    <div class="size-val green">~75mm per foto</div>
+    <div class="size-sub">Technische details goed leesbaar</div>
+  </div>
+  <div class="size-col">
+    <div class="size-label">Volledige breedte — drone ✓</div>
+    <div class="size-val green">~160mm</div>
+    <div class="size-sub">Maximale duidelijkheid dakoverzicht</div>
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ Perfect — screen 5 please</h3>
+    <p>2-col detail photos, full-width drone shots, save only, fully scrollable.</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Still something to adjust</h3>
+    <p>Tell me what to change.</p>
+  </div>
+</div>
+
+</body>
+</html>

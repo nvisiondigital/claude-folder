@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS — Survey Form v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #070d0b;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    color: #e2e8e4;
+    padding: 24px;
+  }
+  h2 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 20px; }
+
+  .app {
+    max-width: 980px;
+    margin: 0 auto;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(114,217,70,0.12);
+    box-shadow: 0 0 60px rgba(114,217,70,0.05);
+    display: flex;
+    flex-direction: column;
+    height: 640px;
+  }
+
+  .gradient-bar { height: 2px; background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47); opacity: 0.6; }
+
+  .topbar {
+    background: #080e0c;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 20px;
+    display: flex; align-items: center; gap: 14px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 7px; padding: 6px 12px; font-size: 12px;
+    color: rgba(255,255,255,0.5); cursor: pointer;
+  }
+  .topbar-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .topbar-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; background: rgba(114,217,70,0.12); color: #72D946; border: 1px solid rgba(114,217,70,0.25); margin-left: auto; }
+  .progress-track { background: rgba(255,255,255,0.05); height: 3px; border-radius: 2px; overflow: hidden; width: 140px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #1B4D47, #72D946); border-radius: 2px; width: 20%; }
+  .progress-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+
+  .body { display: flex; flex: 1; overflow: hidden; background: #080e0c; }
+
+  .section-nav {
+    width: 185px; flex-shrink: 0;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    padding: 16px 0; overflow-y: auto;
+  }
+  .nav-section {
+    padding: 9px 16px; display: flex; align-items: center; gap: 10px;
+    cursor: pointer; font-size: 12px; color: rgba(255,255,255,0.35);
+    border-left: 2px solid transparent;
+  }
+  .nav-section.active { color: #72D946; border-left-color: #72D946; background: rgba(114,217,70,0.05); font-weight: 600; }
+  .nav-icon {
+    width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 11px; flex-shrink: 0;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-section.active .nav-icon { background: rgba(114,217,70,0.15); border-color: rgba(114,217,70,0.3); }
+  .photo-count { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.2); }
+
+  .form-area { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .section-dot { width: 8px; height: 8px; border-radius: 50%; background: #72D946; box-shadow: 0 0 6px rgba(114,217,70,0.5); flex-shrink: 0; }
+  .section-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .section-subtitle { font-size: 11px; color: rgba(255,255,255,0.3); margin-left: auto; }
+
+  /* ── PHOTO GRID ── */
+  .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+  .photo-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: border-color 0.15s;
+  }
+  .photo-card:hover { border-color: rgba(255,255,255,0.14); }
+  .photo-card.filled { border-color: rgba(114,217,70,0.2); }
+
+  /* Card header: slot number + label */
+  .card-head {
+    padding: 7px 9px 5px;
+    display: flex; align-items: flex-start; gap: 6px;
+  }
+  .slot-num {
+    font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06); border-radius: 4px;
+    padding: 1px 5px; flex-shrink: 0; margin-top: 1px;
+  }
+  .slot-label { font-size: 10px; color: rgba(255,255,255,0.4); line-height: 1.35; }
+  .photo-card.filled .slot-label { color: rgba(255,255,255,0.65); }
+
+  /* Photo area */
+  .card-photo {
+    flex: 1;
+    min-height: 72px;
+    background: rgba(255,255,255,0.02);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .empty-icon { font-size: 22px; color: rgba(255,255,255,0.08); }
+
+  /* Filled: thumbnail */
+  .thumb {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #152a15 0%, #0c1a0c 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    position: relative;
+  }
+  .photo-count-badge {
+    position: absolute; top: 5px; right: 5px;
+    background: rgba(0,0,0,0.6); color: #72D946;
+    border-radius: 5px; font-size: 9px; font-weight: 700;
+    padding: 2px 5px;
+  }
+
+  /* Card action bar */
+  .card-actions {
+    padding: 6px 8px;
+    display: flex; gap: 5px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .action-btn {
+    flex: 1; border-radius: 6px; padding: 5px 4px;
+    font-size: 11px; display: flex; align-items: center;
+    justify-content: center; gap: 3px; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.12s;
+    font-weight: 600;
+  }
+
+  /* Primary: take photo (empty state) */
+  .btn-take {
+    background: rgba(114,217,70,0.1);
+    border-color: rgba(114,217,70,0.2);
+    color: #72D946;
+  }
+  .btn-take:hover { background: rgba(114,217,70,0.18); }
+
+  /* Add more */
+  .btn-add {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.45);
+  }
+  .btn-add:hover { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.7); }
+
+  /* Delete */
+  .btn-del {
+    flex: 0 0 auto;
+    width: 28px;
+    background: rgba(239,68,68,0.07);
+    border-color: rgba(239,68,68,0.15);
+    color: rgba(239,68,68,0.5);
+  }
+  .btn-del:hover { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.3); }
+
+  .btn-icon { font-size: 12px; }
+
+  /* Optional divider */
+  .optional-label {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.2);
+  }
+  .optional-label::before, .optional-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+
+  /* Save bar */
+  .save-bar {
+    padding: 11px 20px; background: rgba(255,255,255,0.02);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .save-hint { font-size: 11px; color: rgba(255,255,255,0.25); display: flex; align-items: center; gap: 6px; }
+  .qr-box { width: 28px; height: 28px; background: rgba(255,255,255,0.06); border-radius: 5px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .btn-next { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 8px; }
+  .btn-save { background: linear-gradient(135deg, #72D946, #4aaa28); color: #0a1a08; border-radius: 8px; padding: 9px 22px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 0 16px rgba(114,217,70,0.25); }
+
+  /* Approve row */
+  .options-row { display: flex; gap: 12px; max-width: 980px; margin: 16px auto 0; }
+  .opt { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p { font-size: 12px; color: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+
+<h2>Design section 3 — Survey form v2</h2>
+<p class="subtitle">Photo cards now have a camera button, an add-more button, and a delete button.</p>
+
+<div class="app">
+  <div class="gradient-bar"></div>
+
+  <div class="topbar">
+    <div class="back-btn">← Terug</div>
+    <div>
+      <div class="topbar-title">Opmeting — Luc Janssen</div>
+      <div class="topbar-sub">Mechelsesteenweg 142, Antwerpen</div>
+    </div>
+    <div class="badge">CAT 2</div>
+    <div>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <div class="progress-label">Sectie 1 van 5</div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="section-nav">
+      <div class="nav-section active">
+        <div class="nav-icon">⚡</div>Elektrische inst.<span class="photo-count">11</span>
+      </div>
+      <div class="nav-section">
+        <div class="nav-icon">+</div>Optioneel<span class="photo-count">4</span>
+      </div>
+      <div class="nav-section">
+        <div class="nav-icon">🔌</div>Te plaatsen<span class="photo-count">3</span>
+      </div>
+      <div class="nav-section">
+        <div class="nav-icon">🏠</div>Daksituatie<span class="photo-count">5</span>
+      </div>
+      <div class="nav-section">
+        <div class="nav-icon">📋</div>Metingen & info<span class="photo-count">—</span>
+      </div>
+    </div>
+
+    <div class="form-area">
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <div class="section-title">Elektrische installatie</div>
+        <div class="section-subtitle">Foto's 1 – 11</div>
+      </div>
+
+      <div class="photo-grid">
+
+        <!-- EMPTY slot -->
+        <div class="photo-card">
+          <div class="card-head">
+            <div class="slot-num">01</div>
+            <div class="slot-label">Parkeergelegenheid</div>
+          </div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+
+        <!-- FILLED — 1 photo -->
+        <div class="photo-card filled">
+          <div class="card-head">
+            <div class="slot-num">02</div>
+            <div class="slot-label">Digitale meter / teller</div>
+          </div>
+          <div class="card-photo">
+            <div class="thumb">🔢</div>
+          </div>
+          <div class="card-actions">
+            <div class="action-btn btn-add"><span class="btn-icon">📷</span>+</div>
+            <div class="action-btn btn-del"><span class="btn-icon">🗑</span></div>
+          </div>
+        </div>
+
+        <!-- FILLED — multiple photos -->
+        <div class="photo-card filled">
+          <div class="card-head">
+            <div class="slot-num">03</div>
+            <div class="slot-label">Stroomsterkte / hoofdschakelaar</div>
+          </div>
+          <div class="card-photo">
+            <div class="thumb">⚡<div class="photo-count-badge">3 foto's</div></div>
+          </div>
+          <div class="card-actions">
+            <div class="action-btn btn-add"><span class="btn-icon">📷</span>+</div>
+            <div class="action-btn btn-del"><span class="btn-icon">🗑</span></div>
+          </div>
+        </div>
+
+        <!-- EMPTY -->
+        <div class="photo-card">
+          <div class="card-head">
+            <div class="slot-num">04</div>
+            <div class="slot-label">Omgevingsfoto's el. installatie</div>
+          </div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+
+        <div class="photo-card">
+          <div class="card-head">
+            <div class="slot-num">05</div>
+            <div class="slot-label">Zekeringskast gesloten</div>
+          </div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+
+        <div class="photo-card">
+          <div class="card-head">
+            <div class="slot-num">06</div>
+            <div class="slot-label">Zekeringskast geopend</div>
+          </div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+
+        <div class="photo-card">
+          <div class="card-head">
+            <div class="slot-num">07</div>
+            <div class="slot-label">Hoofd en gevoelige differentieel</div>
+          </div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+
+        <div class="photo-card">
+          <div class="card-head">
+            <div class="slot-num">08</div>
+            <div class="slot-label">Aardingsonderbreker</div>
+          </div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Optional divider -->
+      <div class="optional-label">Indien van toepassing</div>
+
+      <div class="photo-grid">
+        <div class="photo-card">
+          <div class="card-head"><div class="slot-num">12</div><div class="slot-label">Bestaande omvormer</div></div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+        <div class="photo-card">
+          <div class="card-head"><div class="slot-num">13</div><div class="slot-label">Strings omvormer (onderkant)</div></div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+        <div class="photo-card">
+          <div class="card-head"><div class="slot-num">14</div><div class="slot-label">Technische data omvormer</div></div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+        <div class="photo-card">
+          <div class="card-head"><div class="slot-num">15</div><div class="slot-label">Extra zekeringskasten</div></div>
+          <div class="card-photo"><div class="empty-icon">🖼</div></div>
+          <div class="card-actions">
+            <div class="action-btn btn-take"><span class="btn-icon">📷</span> Foto</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <div class="save-hint">
+      <div class="qr-box">▦</div>
+      Foto's van je gsm uploaden? Scan de QR-code.
+    </div>
+    <div style="display:flex;align-items:center;">
+      <div class="btn-next">Volgende sectie →</div>
+      <div class="btn-save">💾 Opmeting opslaan</div>
+    </div>
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ This is right — next screen</h3>
+    <p>Empty = green camera button. Filled = add-more + delete. Multiple photos show a count badge.</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Still something to change</h3>
+    <p>Tell me what to adjust.</p>
+  </div>
+</div>
+
+</body>
+</html>

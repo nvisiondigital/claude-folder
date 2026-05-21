@@ -1,0 +1,76 @@
+<h2>Tool-by-tool breakdown</h2>
+<p class="subtitle">What we build natively, what we link, and what belongs in a later phase</p>
+
+<div class="section">
+  <span class="label">✅ Replace natively — already planned or straightforward to build</span>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">
+    <tr style="background:#e8f5e9;">
+      <td style="padding:10px;border-bottom:1px solid #c8e6c9;font-weight:bold;">iLovePDF</td>
+      <td style="padding:10px;border-bottom:1px solid #c8e6c9;">❌ Gone. We generate all PDFs natively from the survey form. No need to leave the app.</td>
+    </tr>
+    <tr style="background:#f1f8e9;">
+      <td style="padding:10px;border-bottom:1px solid #c8e6c9;font-weight:bold;">Outlook (email)</td>
+      <td style="padding:10px;border-bottom:1px solid #c8e6c9;">❌ Gone. Replaced by the 3 built-in email templates (appointment / report / changes).</td>
+    </tr>
+    <tr style="background:#e8f5e9;">
+      <td style="padding:10px;border-bottom:1px solid #c8e6c9;font-weight:bold;">ESDECK calculator</td>
+      <td style="padding:10px;border-bottom:1px solid #c8e6c9;">✅ Build natively. It's a form with formulas — we replicate it as a built-in calculator tab.</td>
+    </tr>
+    <tr style="background:#f1f8e9;">
+      <td style="padding:10px;font-weight:bold;">Flat roof distance calculator</td>
+      <td style="padding:10px;">✅ Build natively. Same idea — a calculator with inputs and an output. Straightforward.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <span class="label">🔗 Integrate as a link or embed — too complex to replicate, but keep it inside the app</span>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">
+    <tr style="background:#fff3e0;">
+      <td style="padding:10px;border-bottom:1px solid #ffe0b2;font-weight:bold;">Solaredge Designer</td>
+      <td style="padding:10px;border-bottom:1px solid #ffe0b2;">🔗 External link. A solar panel design tool this complex would take a year to rebuild. We add a button that opens it in a new tab, linked directly from the project.</td>
+    </tr>
+    <tr style="background:#fff8e1;">
+      <td style="padding:10px;border-bottom:1px solid #ffe0b2;font-weight:bold;">WebODM (3D drone simulations)</td>
+      <td style="padding:10px;border-bottom:1px solid #ffe0b2;">🔗 External link. Same — too complex to replicate. Button in the project opens it directly.</td>
+    </tr>
+    <tr style="background:#fff3e0;">
+      <td style="padding:10px;border-bottom:1px solid #ffe0b2;font-weight:bold;">GEOPUNT</td>
+      <td style="padding:10px;border-bottom:1px solid #ffe0b2;">🔗 Embed or deep link. We can open GEOPUNT pre-loaded with the project address so Florian lands on the right location automatically.</td>
+    </tr>
+    <tr style="background:#fff8e1;">
+      <td style="padding:10px;font-weight:bold;">Google Calendar</td>
+      <td style="padding:10px;">🔗 Embed. Show Florian's Google Calendar in a panel inside the app so he can check availability without switching tabs.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <span class="label">⏳ Phase 2 — important but builds on the foundation</span>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">
+    <tr style="background:#e3f2fd;">
+      <td style="padding:10px;border-bottom:1px solid #bbdefb;font-weight:bold;">Teamleader</td>
+      <td style="padding:10px;border-bottom:1px solid #bbdefb;">Already planned. API sync so deals flow into the Kanban automatically.</td>
+    </tr>
+    <tr style="background:#ede7f6;">
+      <td style="padding:10px;border-bottom:1px solid #d1c4e9;font-weight:bold;">Sharepoint (document storage)</td>
+      <td style="padding:10px;border-bottom:1px solid #d1c4e9;">Link to specific project folders. Florian can open the right Sharepoint folder from within a project card. Full two-way sync is complex — link first.</td>
+    </tr>
+    <tr style="background:#e3f2fd;">
+      <td style="padding:10px;font-weight:bold;">Product database (with dimensions)</td>
+      <td style="padding:10px;">Admin panel where products are added with specs. Referenced in the survey form and calculators. Solid Phase 2 feature.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <span class="label">🚀 Phase 3 — ambitious, powerful, but needs the rest built first</span>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">
+    <tr style="background:#fce4ec;">
+      <td style="padding:10px;font-weight:bold;">AI agent linked to GHS Sharepoint database</td>
+      <td style="padding:10px;">This is genuinely exciting — an AI assistant Florian can ask "what are the dimensions of X panel?" or "how do I install Y on a flat roof?" and it searches the Sharepoint docs to answer. Fully buildable, but needs the product database and Sharepoint integration in place first.</td>
+    </tr>
+  </table>
+</div>
+
+<p style="text-align:center;margin-top:20px;font-size:13px;color:#666;">Does this split make sense? Anything you'd move between phases?</p>

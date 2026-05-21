@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHS — Contractor Portal v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #070d0b; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; color: #e2e8e4; min-height: 100vh; overflow-y: auto; }
+  body { padding: 24px; }
+  h2 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7c74; margin-bottom: 20px; }
+
+  /* ── LOGIN SCREEN ── */
+  .login-wrap {
+    max-width: 380px; margin: 0 auto 40px;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(114,217,70,0.12);
+    box-shadow: 0 0 60px rgba(114,217,70,0.05);
+  }
+  .login-bar { height: 2px; background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47); opacity: 0.6; }
+  .login-body { background: #080e0c; padding: 32px 28px; text-align: center; }
+  .login-logo { width: 44px; height: 44px; background: linear-gradient(135deg, #72D946, #1B4D47); border-radius: 12px; box-shadow: 0 0 20px rgba(114,217,70,0.3); margin: 0 auto 16px; }
+  .login-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .login-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 24px; }
+  .login-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 11px 14px; font-size: 13px; color: rgba(255,255,255,0.5); width: 100%; margin-bottom: 12px; text-align: left; letter-spacing: 3px; }
+  .login-btn { background: linear-gradient(135deg, #72D946, #4aaa28); color: #0a1a08; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 0 16px rgba(114,217,70,0.25); }
+  .login-note { font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 16px; }
+
+  .section-divider { max-width: 1020px; margin: 0 auto 20px; display: flex; align-items: center; gap: 12px; font-size: 12px; color: rgba(255,255,255,0.3); }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+
+  /* ── PORTAL SCREEN ── */
+  .app { max-width: 1020px; margin: 0 auto; border-radius: 14px; border: 1px solid rgba(114,217,70,0.12); box-shadow: 0 0 60px rgba(114,217,70,0.05); overflow: hidden; }
+  .gradient-bar { height: 2px; background: linear-gradient(90deg, #1B4D47, #72D946, #1B4D47); opacity: 0.6; }
+
+  .topbar { background: #080e0c; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 13px 20px; display: flex; align-items: center; gap: 12px; }
+  .portal-logo { width: 28px; height: 28px; background: linear-gradient(135deg, #72D946, #1B4D47); border-radius: 7px; box-shadow: 0 0 10px rgba(114,217,70,0.2); flex-shrink: 0; }
+  .topbar-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .topbar-sub { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+  .portal-badge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 3px 10px; font-size: 10px; color: rgba(255,255,255,0.4); margin-left: auto; }
+
+  .kanban { padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .column { flex: 1; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+  .col-header { padding: 11px 13px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .col-title { font-size: 11px; font-weight: 700; }
+  .col-count { margin-left: auto; background: rgba(255,255,255,0.07); border-radius: 10px; padding: 1px 7px; font-size: 10px; color: rgba(255,255,255,0.35); }
+  .col-new .col-dot { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); } .col-new .col-title { color: #f87171; }
+  .col-plan .col-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.5); } .col-plan .col-title { color: #f59e0b; }
+  .col-done .col-dot { background: #72D946; box-shadow: 0 0 6px rgba(114,217,70,0.5); } .col-done .col-title { color: #72D946; }
+  .col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+  .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 11px; }
+
+  /* ── CARD HEADER INFO ── */
+  .card-name { font-size: 12px; font-weight: 700; color: #e2e8e4; margin-bottom: 6px; }
+
+  /* Pin block — city + address + phone */
+  .card-location { margin-bottom: 10px; }
+  .card-location-main { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+  .pin-icon { font-size: 11px; }
+  .card-city { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .card-type-tag { margin-left: auto; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1px 7px; font-size: 9px; color: rgba(255,255,255,0.35); white-space: nowrap; }
+  .card-location-detail { font-size: 10px; color: rgba(255,255,255,0.28); padding-left: 16px; line-height: 1.6; }
+  .card-location-detail .phone { color: rgba(114,217,70,0.45); }
+
+  /* Claim dropdown */
+  .claim-row { margin-bottom: 8px; }
+  .claim-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.25); margin-bottom: 5px; }
+  .claim-select {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;
+    padding: 7px 10px; font-size: 12px; color: rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+  }
+  .claim-select.claimed { background: rgba(114,217,70,0.08); border-color: rgba(114,217,70,0.25); color: #72D946; font-weight: 600; }
+  .claim-arrow { font-size: 10px; color: rgba(255,255,255,0.25); }
+
+  /* Contractor avatar chip */
+  .contractor-chip { display: flex; align-items: center; gap: 6px; }
+  .contractor-avatar { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #1B4D47, #72D946); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; flex-shrink: 0; }
+
+  /* ── APPOINTMENT SCHEDULING (inside Nieuw contact card) ── */
+  .schedule-block {
+    margin-top: 8px;
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.18);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .schedule-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(245,158,11,0.6); margin-bottom: 8px; }
+  .schedule-fields { display: flex; gap: 7px; margin-bottom: 8px; }
+  .schedule-field {
+    flex: 1; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(245,158,11,0.2); border-radius: 6px;
+    padding: 7px 9px; font-size: 11px; color: rgba(255,255,255,0.55);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .schedule-field-label { font-size: 9px; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.5px; }
+  .schedule-field-val { font-size: 12px; color: #e2e8e4; }
+
+  /* ── APPOINTMENT BADGE on Ingepland card ── */
+  .appt-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 6px; padding: 6px 9px;
+    margin-bottom: 8px;
+  }
+  .appt-icon { font-size: 12px; }
+  .appt-date { font-size: 11px; font-weight: 600; color: #f59e0b; }
+  .appt-time { font-size: 11px; color: rgba(245,158,11,0.6); }
+
+  .card-btn { width: 100%; border-radius: 6px; padding: 7px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid transparent; text-align: center; transition: all 0.12s; margin-top: 6px; }
+  .btn-move { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.2); color: #f59e0b; }
+  .btn-confirm { background: linear-gradient(135deg, rgba(245,158,11,0.9), rgba(245,158,11,0.6)); color: #0a0800; font-weight: 700; box-shadow: 0 0 8px rgba(245,158,11,0.2); }
+  .btn-upload { background: rgba(114,217,70,0.1); border-color: rgba(114,217,70,0.25); color: #72D946; }
+  .btn-done { background: linear-gradient(135deg, #72D946, #4aaa28); color: #0a1a08; font-weight: 700; box-shadow: 0 0 10px rgba(114,217,70,0.2); }
+  .btn-edit { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); font-size: 10px; }
+
+  /* Upload area (expanded on planned card) */
+  .upload-area {
+    margin-top: 8px; background: rgba(255,255,255,0.03);
+    border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;
+    padding: 12px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .upload-slot { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 6px; padding: 7px 9px; cursor: pointer; font-size: 11px; color: rgba(255,255,255,0.45); transition: all 0.12s; }
+  .upload-slot.filled { border-color: rgba(114,217,70,0.2); color: rgba(114,217,70,0.7); background: rgba(114,217,70,0.05); }
+  .upload-icon { font-size: 13px; }
+  .upload-count { margin-left: auto; font-size: 10px; color: rgba(114,217,70,0.5); }
+
+  .notes-field { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 10px; font-size: 11px; color: rgba(255,255,255,0.4); font-family: inherit; resize: none; min-height: 56px; margin-top: 6px; outline: none; }
+  .notes-field::placeholder { color: rgba(255,255,255,0.2); }
+
+  /* Completed card */
+  .submitted-line { font-size: 10px; color: rgba(114,217,70,0.6); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+  .appt-was { font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 3px; }
+
+  /* Edit state for completed card */
+  .edit-banner {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.18);
+    border-radius: 6px; padding: 6px 9px; margin-bottom: 8px;
+    font-size: 10px; color: rgba(248,113,113,0.7);
+  }
+
+  .options-row { display: flex; gap: 12px; max-width: 1020px; margin: 16px auto 0; }
+  .opt { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; }
+  .opt:hover { border-color: rgba(114,217,70,0.4); }
+  .opt.selected { border-color: #72D946; background: rgba(114,217,70,0.05); }
+  .opt h3 { font-size: 13px; font-weight: 600; color: #e2e8e4; margin-bottom: 4px; }
+  .opt p { font-size: 12px; color: rgba(255,255,255,0.35); }
+
+  .change-label { font-size: 10px; color: #72D946; background: rgba(114,217,70,0.1); border: 1px solid rgba(114,217,70,0.2); border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<h2>Design section 6 — Contractor portal <span style="font-size:13px;color:#72D946;font-weight:400;">v2</span></h2>
+<p class="subtitle">3 aanpassingen: uitgebreide kaartinfo · afspraakinplanning vanuit kolom 1 · bewerkoptie in kolom 3</p>
+
+<!-- LOGIN -->
+<div class="login-wrap">
+  <div class="login-bar"></div>
+  <div class="login-body">
+    <div class="login-logo"></div>
+    <div class="login-title">Green House Solutions</div>
+    <div class="login-sub">Aannemer portaal — voer het wachtwoord in</div>
+    <div class="login-field">● ● ● ● ● ● ● ●</div>
+    <div class="login-btn">Inloggen</div>
+    <div class="login-note">Wachtwoord vergeten? Neem contact op met Florian.</div>
+  </div>
+</div>
+
+<div class="section-divider">Na het inloggen ziet de aannemer dit</div>
+
+<!-- PORTAL -->
+<div class="app">
+  <div class="gradient-bar"></div>
+
+  <div class="topbar">
+    <div class="portal-logo"></div>
+    <div>
+      <div class="topbar-title">GHS — Aannemer portaal</div>
+      <div class="topbar-sub">Opdrachtenoverzicht</div>
+    </div>
+    <div class="portal-badge">🔒 Portaal</div>
+  </div>
+
+  <div class="kanban">
+
+    <!-- COL 1: Nieuw -->
+    <div class="column col-new">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        <div class="col-title">Nieuw contact</div>
+        <div class="col-count">2</div>
+      </div>
+      <div class="col-body">
+
+        <!-- Unclaimed — dropdown to claim -->
+        <div class="card">
+          <div class="card-name">Els Vermeersch</div>
+
+          <!-- CHANGE 1: expanded address + phone -->
+          <div class="card-location">
+            <div class="card-location-main">
+              <span class="pin-icon">📍</span>
+              <span class="card-city">Kortrijk</span>
+              <span class="card-type-tag">Complex project</span>
+            </div>
+            <div class="card-location-detail">
+              Grotesteenweg 45, 8500 Kortrijk<br>
+              <span class="phone">📞 0474 12 34 56</span>
+            </div>
+          </div>
+
+          <div class="claim-row">
+            <div class="claim-label">Neem deze opdracht over</div>
+            <div class="claim-select">
+              Selecteer je naam <span class="claim-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Claimed → scheduling state (CHANGE 2) -->
+        <div class="card">
+          <div class="card-name">Raf Declercq</div>
+
+          <div class="card-location">
+            <div class="card-location-main">
+              <span class="pin-icon">📍</span>
+              <span class="card-city">Mechelen</span>
+              <span class="card-type-tag">Plat dak</span>
+            </div>
+            <div class="card-location-detail">
+              P. Breughelstraat 12, 2800 Mechelen<br>
+              <span class="phone">📞 0476 98 76 54</span>
+            </div>
+          </div>
+
+          <div class="claim-row">
+            <div class="claim-label">Overgenomen door</div>
+            <div class="claim-select claimed">
+              <div class="contractor-chip">
+                <div class="contractor-avatar">J</div>
+                Jonas
+              </div>
+              <span class="claim-arrow">▾</span>
+            </div>
+          </div>
+
+          <!-- CHANGE 2: Appointment scheduling block appears after claiming -->
+          <div class="schedule-block">
+            <div class="schedule-label">📅 Afspraak inplannen met klant <span class="change-label">nieuw</span></div>
+            <div class="schedule-fields">
+              <div class="schedule-field">
+                <div class="schedule-field-label">Datum</div>
+                <div class="schedule-field-val">vr 23 mei 2026</div>
+              </div>
+              <div class="schedule-field">
+                <div class="schedule-field-label">Uur</div>
+                <div class="schedule-field-val">09:00</div>
+              </div>
+            </div>
+            <div class="card-btn btn-confirm">✓ Bevestigen & markeer als ingepland</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COL 2: Ingepland -->
+    <div class="column col-plan">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        <div class="col-title">Ingepland</div>
+        <div class="col-count">1</div>
+      </div>
+      <div class="col-body">
+
+        <!-- Planned card — WITH appointment badge (CHANGE 2) -->
+        <div class="card">
+          <div class="card-name">Nathalie Peeters</div>
+
+          <div class="card-location">
+            <div class="card-location-main">
+              <span class="pin-icon">📍</span>
+              <span class="card-city">Leuven</span>
+              <span class="card-type-tag">20 panelen</span>
+            </div>
+            <div class="card-location-detail">
+              Naamsestraat 88, 3000 Leuven<br>
+              <span class="phone">📞 0468 11 22 33</span>
+            </div>
+          </div>
+
+          <div class="claim-row">
+            <div class="claim-label">Overgenomen door</div>
+            <div class="claim-select claimed">
+              <div class="contractor-chip">
+                <div class="contractor-avatar">M</div>
+                Mauro
+              </div>
+              <span class="claim-arrow">▾</span>
+            </div>
+          </div>
+
+          <!-- CHANGE 2: Appointment badge -->
+          <div class="appt-badge">
+            <span class="appt-icon">📅</span>
+            <span class="appt-date">vr 23 mei</span>
+            <span class="appt-time">09:00</span>
+          </div>
+
+          <div class="upload-area">
+            <div class="upload-slot filled">
+              <span class="upload-icon">📁</span>
+              Foto's uploaden
+              <span class="upload-count">14 foto's</span>
+            </div>
+            <div class="upload-slot">
+              <span class="upload-icon">📎</span>
+              Extra bestanden toevoegen
+            </div>
+            <textarea class="notes-field" placeholder="Notities voor Florian...">Kabeltraject via zijgevel. Meter in berging. Geen bestaande omvormer aanwezig.</textarea>
+          </div>
+          <div class="card-btn btn-done">✓ Opmeting indienen</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COL 3: Gedaan -->
+    <div class="column col-done">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        <div class="col-title">Opmeting gedaan</div>
+        <div class="col-count">2</div>
+      </div>
+      <div class="col-body">
+
+        <!-- Completed — read-only with EDIT button (CHANGE 3) -->
+        <div class="card">
+          <div class="card-name">Ward Stevens</div>
+          <div class="card-location">
+            <div class="card-location-main">
+              <span class="pin-icon">📍</span>
+              <span class="card-city">Turnhout</span>
+              <span class="card-type-tag">Plat dak</span>
+            </div>
+            <div class="card-location-detail">
+              Herentalsstraat 3, 2300 Turnhout<br>
+              <span class="phone">📞 0471 55 66 77</span>
+            </div>
+          </div>
+          <div class="contractor-chip" style="margin-bottom:8px;">
+            <div class="contractor-avatar">S</div>
+            <span style="font-size:11px;color:rgba(255,255,255,0.5);">Sven</span>
+          </div>
+          <div class="appt-badge" style="border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);">
+            <span class="appt-icon">📅</span>
+            <span class="appt-date" style="color:rgba(255,255,255,0.3);">ma 13 mei</span>
+            <span class="appt-time" style="color:rgba(255,255,255,0.2);">10:30</span>
+          </div>
+          <div class="submitted-line">✓ Ingediend op 18 mei 2026</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:4px;font-style:italic;">"Plat dak, bitumen. Omvormer in technische ruimte."</div>
+          <!-- CHANGE 3: edit button -->
+          <div class="card-btn btn-edit" style="margin-top:10px;">✏ Bewerken / foto's toevoegen</div>
+        </div>
+
+        <!-- CHANGE 3: Same card in EDIT STATE — show what clicking "Bewerken" does -->
+        <div class="card" style="border-color:rgba(248,113,113,0.2);">
+          <div class="card-name">Ward Stevens <span style="font-size:10px;font-weight:400;color:rgba(248,113,113,0.6);">— bewerkmodus</span></div>
+          <div class="card-location">
+            <div class="card-location-main">
+              <span class="pin-icon">📍</span>
+              <span class="card-city">Turnhout</span>
+              <span class="card-type-tag">Plat dak</span>
+            </div>
+            <div class="card-location-detail">
+              Herentalsstraat 3, 2300 Turnhout<br>
+              <span class="phone">📞 0471 55 66 77</span>
+            </div>
+          </div>
+          <div class="edit-banner">
+            ✏ Je past een ingediend verslag aan — sla opnieuw op als je klaar bent
+          </div>
+          <div class="upload-area">
+            <div class="upload-slot filled">
+              <span class="upload-icon">📁</span>
+              Foto's
+              <span class="upload-count">9 foto's</span>
+            </div>
+            <div class="upload-slot">
+              <span class="upload-icon">📎</span>
+              Extra bestanden
+            </div>
+            <textarea class="notes-field" placeholder="Notities...">Plat dak, bitumen. Omvormer in technische ruimte.</textarea>
+          </div>
+          <div class="card-btn btn-done" style="margin-top:6px;">💾 Wijzigingen opslaan</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="options-row">
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>✓ Looks good — screen 7</h3>
+    <p>Adres + telefoon · afspraakinplanning vanuit kolom 1 · bewerkoptie in kolom 3.</p>
+  </div>
+  <div class="opt" onclick="this.classList.toggle('selected')">
+    <h3>↺ Iets aanpassen</h3>
+    <p>Vertel me wat.</p>
+  </div>
+</div>
+
+</body>
+</html>
